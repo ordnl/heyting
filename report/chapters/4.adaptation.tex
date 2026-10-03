@@ -36,8 +36,7 @@
 \section{The infinitary calculus}
 We adapt the system presented as $\textsf{IHA}$ in \cite{TAT11} and remove the structural rules by using using multisets and context-sharing similar to $\textsf{G3i}$ in \cite{TRO00}:
 \begin{definition}{(The system $\HA_\omega$)}
-We define a sequent $\seqd{\Gamma}{C}{\alpha}{r}$ where $\Gamma$ is a multiset, $C$ is a formula, $r \in \mathbb{N}$ and $\alpha$ an ordinal. \emph{$\Gamma \vdash^\alpha_r C$ has a derivation with maximum height $\alpha$ and with with maximum cut $r$} if it is obtained from the inference rules on the \emph{initial sequents}. In the following, $\alpha_i < \alpha$:
-\todo{Do I want to say $C$ is either empty, or just leave it as a formula and use $\bot$}
+We define a sequent $\seqd{\Gamma}{C}{\alpha}{r}$ where $\Gamma$ is a multiset, $C$ is a formula, $r \in \mathbb{N}$ and $\alpha$ an ordinal. \emph{$\Gamma \vdash^\alpha_r C$ has a derivation with maximum height $\alpha$ and with with maximum cut $r$} if it is obtained from the inference rules on the \emph{initial sequents}. In the following, $\alpha_i < \alpha$ and $C$ may be empty.
 
 \emph{Initial sequents}:
 \begin{align*}
@@ -155,10 +154,9 @@ If $\seqd{\Gamma}{C}{\alpha}{r}$, then $\seqd{\Gamma,\Pi}{C}{\alpha}{r}$.
     $(\lor R)$, $(\exists R)$, $(\forall L)$, and $(\to L)$ are not entirely invertible.
 \end{lemma}
 
-%\begin{lemma}{(Empty sequent cannot be cut-free)}
-%    $\seqd{}{}{\alpha}{0}$ does not hold for any $\alpha$.
-%\end{lemma}
-\todo{We need to prove that we can always increase the $\alpha$ and $r$ whenever we want.}
+\begin{theorem}{(Monotonicity)}
+    If $\seqd{\Gamma}{C}{\alpha}{r}$, $\alpha < \beta$ and $r < s$, then $\seqd{\Gamma}{C}{\beta}{s}$
+\end{theorem}
 
 \subsection{Embedding}
 
@@ -173,7 +171,6 @@ However, this is not possible if our $\omega$-rule requires every term. As such 
 
 \begin{definition}{(Normalised terms)}
     For a closed formula $A$, we will call the normalised formula $A^*$, the result of replacing every closed term $t$ with $\val(t)$.
-    \todo{I have to be careful with the notational and semantic stuff here}
 \end{definition}
 Evaluating all the closed terms will not change the truth value of a sequent. For free variables, we will effectively move the free variables out of the object language and consider their universal closure. As an example: 
 \[ \seq{\Gamma}{a(a+b)=a^2+ab} \rightsquigarrow \forall m,n \in \mathbb{N} \; \left( \seq{\Gamma^*}{\bar{m}(\bar{m}+\bar{n})=\bar{m}^2-\bar{n}} \right) \]
@@ -196,7 +193,7 @@ Thus each sequent in this embedding will be mapped to multiple sequents. By maki
     We can maintain $\gr(A(n)) < r$ and, we see the height increases by an extra inference. Thus in general we can prove $\seqd{\Gamma}{A(n)}{\max(\alpha,\beta) + n}{r}$. Therefore with the $\omega$-rule, we can obtain $\seqd{\Gamma}{\forall x\;A(x)}{\max(\alpha,\beta) + \omega}{r}$
 \end{proof}
 
-As we observe in induction admissibility, it will be the main contribution to an increase in height when translating a proof from $\HA$ to $\HA_\omega$. Thus each induction will add an extra $\omega$ to the height of the proof when converted to a $\HA_\omega$ proof:
+Induction will be the main contribution to an increase in height when translating a proof from $\HA$ to $\HA_\omega$. Thus each induction will add an extra $\omega$ to the height of the proof when converted to a $\HA_\omega$ proof:
 
 \begin{theorem}{(Embedding)}
     If $\seqd{\Gamma}{C}{n}{r}$ is derivable in $\HA$ with $k$ inductions, then $\seqd{(\Gamma[\sigma])^*}{(C[\sigma])^*}{\omega \cdot k + n}{r}$ is derivable in $\HA_\omega$ where $\sigma$ is any substitution of free variables for numerals.
@@ -240,7 +237,7 @@ Therefore, we see this subproof contributes at most $\max(\alpha',\beta')+2$. If
     If $\seqd{\Gamma}{C}{\alpha}{r+1}$, then $\seqd{\Gamma}{C}{\omega^{\left(\omega^\alpha\right)}}{r}$
 \end{theorem}
 \begin{proof}
-    This is by induction on the number of inferences. \todo{The other cases are chill}. Let $A$ be the cut with $\gr(A) = r$, then we have premises:  $\seqd{\Gamma}{A}{\alpha_1}{r+1}$ and $\seqd{\Gamma,A}{C}{\alpha_2}{r+1}$ (where $\alpha_1,\alpha_2 < \alpha$). Applying the induction hypothesis on the two premises gives us: $\seqd{\Gamma}{A}{\omega^{\omega^\alpha_1}}{r}$ and $\seqd{\Gamma,A}{C}{\omega^{\omega^\alpha_2}}{r}$. We can apply our previous lemma on this to obtain: 
+    This is by induction on the number of inferences. \todo{Write up the other cases (inversion lemmas helpful here)}. Let $A$ be the cut with $\gr(A) = r$, then we have premises:  $\seqd{\Gamma}{A}{\alpha_1}{r+1}$ and $\seqd{\Gamma,A}{C}{\alpha_2}{r+1}$ (where $\alpha_1,\alpha_2 < \alpha$). Applying the induction hypothesis on the two premises gives us: $\seqd{\Gamma}{A}{\omega^{\omega^\alpha_1}}{r}$ and $\seqd{\Gamma,A}{C}{\omega^{\omega^\alpha_2}}{r}$. We can apply our previous lemma on this to obtain: 
     \[ \seqd{\Gamma}{C}{\omega\cdot \left(\omega^{\omega^{\alpha_1}}\#\omega^{\omega^{\alpha_2}}\right) + \omega}{r} \]
     Since $\omega\cdot \left(\omega^{\omega^{\alpha_1}}\#\omega^{\omega^{\alpha_2}}\right) + \omega < \omega^{\left(\omega^\alpha\right)}$, our conclusion holds.
 \end{proof}
