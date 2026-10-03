@@ -172,8 +172,12 @@ However, this is not possible if our $\omega$-rule requires every term. As such 
 \begin{definition}{(Normalised terms)}
     For a closed formula $A$, we will call the normalised formula $A^*$, the result of replacing every closed term $t$ with $\val(t)$.
 \end{definition}
-Evaluating all the closed terms will not change the truth value of a sequent. For free variables, we will effectively move the free variables out of the object language and consider their universal closure. As an example: 
-\[ \seq{\Gamma}{a(a+b)=a^2+ab} \rightsquigarrow \forall m,n \in \mathbb{N} \; \left( \seq{\Gamma^*}{\bar{m}(\bar{m}+\bar{n})=\bar{m}^2-\bar{n}} \right) \]
+Evaluating all the closed terms will not change the truth value of a sequent. For free variables, we will effectively move the free variables out of the object language and consider their universal closure. This is equivalent to replacing the free variables with every possible numeral:
+\begin{align*}
+    \seq{\Gamma}{a(a+b)=a^2+ab} &\rightsquigarrow \forall m,n \in \mathbb{N} \; \left( \seq{\Gamma^*}{\bar{m}(\bar{m}+\bar{n})=\bar{m}^2-\bar{n}} \right) \\
+    &\leftrightsquigarrow \seq{(\Gamma[\sigma])^*}{(a(a+b)=a^2+ab)[\sigma]}
+\end{align*}
+\todo{Substitution notation}
 Thus each sequent in this embedding will be mapped to multiple sequents. By making this accommodation, we find $\HA_\omega$ with only normalised formulae has admissibility of induction:
 
 \begin{lemma}{(Induction admissibility)}
@@ -237,7 +241,7 @@ Therefore, we see this subproof contributes at most $\max(\alpha',\beta')+2$. If
     If $\seqd{\Gamma}{C}{\alpha}{r+1}$, then $\seqd{\Gamma}{C}{\omega^{\left(\omega^\alpha\right)}}{r}$
 \end{theorem}
 \begin{proof}
-    This is by induction on the number of inferences. \todo{Write up the other cases (inversion lemmas helpful here)}. Let $A$ be the cut with $\gr(A) = r$, then we have premises:  $\seqd{\Gamma}{A}{\alpha_1}{r+1}$ and $\seqd{\Gamma,A}{C}{\alpha_2}{r+1}$ (where $\alpha_1,\alpha_2 < \alpha$). Applying the induction hypothesis on the two premises gives us: $\seqd{\Gamma}{A}{\omega^{\omega^\alpha_1}}{r}$ and $\seqd{\Gamma,A}{C}{\omega^{\omega^\alpha_2}}{r}$. We can apply our previous lemma on this to obtain: 
+    This is by induction on the left and right derivations. \todo{Write up the other cases (inversion lemmas helpful here)}. Let $A$ be the cut with $\gr(A) = r$, then we have premises:  $\seqd{\Gamma}{A}{\alpha_1}{r+1}$ and $\seqd{\Gamma,A}{C}{\alpha_2}{r+1}$ (where $\alpha_1,\alpha_2 < \alpha$). Applying the induction hypothesis on the two premises gives us: $\seqd{\Gamma}{A}{\omega^{\omega^\alpha_1}}{r}$ and $\seqd{\Gamma,A}{C}{\omega^{\omega^\alpha_2}}{r}$. We can apply our previous lemma on this to obtain: 
     \[ \seqd{\Gamma}{C}{\omega\cdot \left(\omega^{\omega^{\alpha_1}}\#\omega^{\omega^{\alpha_2}}\right) + \omega}{r} \]
     Since $\omega\cdot \left(\omega^{\omega^{\alpha_1}}\#\omega^{\omega^{\alpha_2}}\right) + \omega < \omega^{\left(\omega^\alpha\right)}$, our conclusion holds.
 \end{proof}
