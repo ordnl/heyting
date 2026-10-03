@@ -33,7 +33,7 @@
     A closed atom $s = t$ is \emph{true} if $\val(s)=\val(t)$, and false otherwise. $\bot$ is a false atom.
 \end{definition}
 
-\section{The system $\HA_{\omega}$}
+\section{The infinitary calculus}
 We adapt the system presented as $\textsf{IHA}$ in \cite{TAT11} and remove the structural rules by using using multisets and context-sharing similar to $\textsf{G3i}$ in \cite{TRO00}:
 \begin{definition}{(The system $\HA_\omega$)}
 We define a sequent $\seqd{\Gamma}{C}{\alpha}{r}$ where $\Gamma$ is a multiset, $C$ is a formula, $r \in \mathbb{N}$ and $\alpha$ an ordinal. \emph{$\Gamma \vdash^\alpha_r C$ has a derivation with maximum height $\alpha$ and with with maximum cut $r$} if it is obtained from the inference rules on the \emph{initial sequents}. In the following, $\alpha_i < \alpha$:
@@ -175,8 +175,9 @@ However, this is not possible if our $\omega$-rule requires every term. As such 
     For a closed formula $A$, we will call the normalised formula $A^*$, the result of replacing every closed term $t$ with $\val(t)$.
     \todo{I have to be careful with the notational and semantic stuff here}
 \end{definition}
-
-Thus for $\HA_\omega$ only contain normalised formulae. \todo{There are other ways to do this, but this is the rough idea. There are some details I need to work out here.}
+Evaluating all the closed terms will not change the truth value of a sequent. For free variables, we will effectively move the free variables out of the object language and consider their universal closure. As an example: 
+\[ \seq{\Gamma}{a(a+b)=a^2+ab} \rightsquigarrow \forall m,n \in \mathbb{N} \; \left( \seq{\Gamma^*}{\bar{m}(\bar{m}+\bar{n})=\bar{m}^2-\bar{n}} \right) \]
+Thus each sequent in this embedding will be mapped to multiple sequents. By making this accommodation, we find $\HA_\omega$ with only normalised formulae has admissibility of induction:
 
 \begin{lemma}{(Induction admissibility)}
     Given $\seqd{\Gamma}{A(0)}{\alpha}{r}$ and $\seqd{\Gamma,A(n)}{A(S(n))}{\beta}{r}$, then:
@@ -198,7 +199,7 @@ Thus for $\HA_\omega$ only contain normalised formulae. \todo{There are other wa
 As we observe in induction admissibility, it will be the main contribution to an increase in height when translating a proof from $\HA$ to $\HA_\omega$. Thus each induction will add an extra $\omega$ to the height of the proof when converted to a $\HA_\omega$ proof:
 
 \begin{theorem}{(Embedding)}
-    If $\seqd{\Gamma}{C}{n}{r}$ is derivable in $\HA$ with $k$ inductions, then $\seqd{\Gamma}{C}{\omega \cdot k + n}{r}$ is derivable in $\HA_\omega$. 
+    If $\seqd{\Gamma}{C}{n}{r}$ is derivable in $\HA$ with $k$ inductions, then $\seqd{(\Gamma[\sigma])^*}{(C[\sigma])^*}{\omega \cdot k + n}{r}$ is derivable in $\HA_\omega$ where $\sigma$ is any substitution of free variables for numerals.
 \end{theorem}
 \begin{proof}
     \todo{This proof is pretty complicated in formalisation. Might want to change the way it is phrased? This has a lot to do substitution stuff, which is pretty finicky.}
