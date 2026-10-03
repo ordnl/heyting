@@ -1,0 +1,270 @@
+\chapter{Adaptation of infinitary proof}
+
+\begin{definition}{(Terms in $\HA$)}
+    We define the terms of our language recursively:
+    \begin{itemize}
+        \item $0$ is a term.
+        \item If $t, s$ are terms, then $S(t), t+s, t\cdot s$ are terms.
+    \end{itemize}
+\end{definition}
+\begin{definition}{(Numerals, closed terms, values)}
+    \begin{itemize}
+        \item A numeral of $n \in \mathbb{N}$ is $\overline{n} := \underbrace{S(\dots S(n)))}_{\text{$n$-times}}$
+        \item A term is closed if it contains no free variables.
+        \item The value of a closed term is defined recursively:
+        \begin{itemize}
+            \item $\val(0) = 0_\mathbb{N}$
+            \item $\val(S(t)) = \val(t) +_\mathbb{N} 1_\mathbb{N}$
+            \item $\val(t + s)) = \val(t) +_\mathbb{N} \val(s)$
+            \item $\val(t \cdot s) = \val(t) \cdot_\mathbb{N} \val(s)$
+        \end{itemize}
+    \end{itemize}
+\end{definition}
+\begin{definition}{(Formula in $\HA$)}
+    We define the formulae of our language recursively:
+    \begin{itemize}
+        \item $\bot$ is an atomic formula.
+        \item If $t,s$ are terms, then $t=s$ is an atomic formulae.
+        \item If $P,Q$ are formulae, then $P \land Q, P \lor Q, P \to Q, \forall x\; P, \exists x\; P$ are formulae
+    \end{itemize}
+    A formula without free variables is closed. \todo{Define free/bound variables properly later}
+\end{definition}
+\begin{definition}{(True and false atoms)}
+    A closed atom $s = t$ is \emph{true} if $\val(s)=\val(t)$, and false otherwise. $\bot$ is a false atom.
+\end{definition}
+
+\section{The system $\HA_{\omega}$}
+We adapt the system presented as $\textsf{IHA}$ in \cite{TAT11} and remove the structural rules by using using multisets and context-sharing similar to $\textsf{G3i}$ in \cite{TRO00}:
+\begin{definition}{(The system $\HA_\omega$)}
+We define a sequent $\seqd{\Gamma}{C}{\alpha}{r}$ where $\Gamma$ is a multiset, $C$ is a formula, $r \in \mathbb{N}$ and $\alpha$ an ordinal. \emph{$\Gamma \vdash^\alpha_r C$ has a derivation with maximum height $\alpha$ and with with maximum cut $r$} if it is obtained from the inference rules on the \emph{initial sequents}. In the following, $\alpha_i < \alpha$:
+\todo{Do I want to say $C$ is either empty, or just leave it as a formula and use $\bot$}
+
+\emph{Initial sequents}:
+\begin{align*}
+&\overline{\seqd{\Gamma}{P}{\alpha}{r}}\;(\rm{Ax\;R}) \text{ for true atoms $P$ and } \\
+&\overline{\seqd{\Gamma, P}{C}{\alpha}{r}}\;(\rm{Ax\;L}) \text{ for false atoms $P$}
+\end{align*}
+
+\emph{Logical rules}:
+
+% AND Right/Left
+\begin{center}
+\AxiomC{$\seqd{\Gamma}{A}{\alpha_1}{r}$}
+\AxiomC{$\seqd{\Gamma}{B}{\alpha_2}{r}$}
+\RightLabel{$(\wedge\rm{R})$}
+\BinaryInfC{$\seqd{\Gamma}{A\wedge B}{\alpha}{r}$}
+\DisplayProof
+\quad
+\AxiomC{$\seqd{\Gamma,A,B}{C}{\alpha_1}{r}$}
+\RightLabel{$(\wedge\rm{L})$}
+\UnaryInfC{$\seqd{A\wedge B,\Gamma}{C}{\alpha}{r}$}
+\DisplayProof
+\end{center}
+
+% OR Right/Left
+\begin{center}
+\AxiomC{$\seqd{\Gamma}{A_i}{\alpha_1}{r}$}
+\RightLabel{$(\vee\rm{R})$}
+\UnaryInfC{$\seqd{\Gamma}{A_0 \vee A_1}{\alpha}{r}$}
+\DisplayProof
+\quad
+\AxiomC{$\seqd{\Gamma,A}{C}{\alpha_1}{r}$}
+\AxiomC{$\seqd{\Gamma,B}{C}{\alpha_2}{r}$}
+\RightLabel{$(\vee\rm{L})$}
+\BinaryInfC{$\seqd{A\vee B,\Gamma}{C}{\alpha}{r}$}
+\DisplayProof
+\end{center}
+
+% IMP Right/Left
+\begin{center}
+\AxiomC{$\seqd{\Gamma, A}{B}{\alpha_1}{r}$}
+\RightLabel{$(\rightarrow\rm{R})$}
+\UnaryInfC{$\seqd{\Gamma}{A\rightarrow B}{\alpha}{r}$}
+\DisplayProof
+\quad
+\AxiomC{$\seqd{\Gamma,A\rightarrow B}{A}{\alpha_1}{r}$}
+\AxiomC{$\seqd{B,\Gamma}{C}{\alpha_2}{r}$}
+\RightLabel{$(\rightarrow\rm{L})$}
+\BinaryInfC{$\seqd{\Gamma,A\rightarrow B}{C}{\alpha}{r}$}
+\DisplayProof
+\end{center}
+
+% FORALL Right/Left
+\begin{center}
+\AxiomC{$\seqd{\Gamma}{A(t)}{\alpha_i}{r} \quad \text{(for all $t$)}$}
+\RightLabel{$(\forall\rm{R}_\infty)$}
+\UnaryInfC{$\seqd{\Gamma}{\forall x\,A(x)}{\alpha}{r}$}
+\DisplayProof
+\quad
+\AxiomC{$\seqd{\Gamma,A(t),\forall x\,A(x)}{C}{\alpha_i}{r}$}
+\RightLabel{$(\forall\rm{L})$}
+\UnaryInfC{$\seqd{\Gamma,\forall x\,A(x)}{C}{\alpha}{r}$}
+\DisplayProof
+\end{center}
+
+% EXISTS Right/Left
+\begin{center}
+\AxiomC{$\seqd{\Gamma}{A(t)}{\alpha_1}{r}$}
+\RightLabel{$(\exists\rm{R})$}
+\UnaryInfC{$\seqd{\Gamma}{\exists x\,A(x)}{\alpha}{r}$}
+\DisplayProof
+\quad
+\AxiomC{$\Gamma,\seqd{A(t)}{C}{\alpha_i}{r} \quad \text{(for all $t$)}$}
+\RightLabel{$(\exists\rm{L}_\infty)$}
+\UnaryInfC{$\seqd{\Gamma,\exists x\,A(x)}{C}{\alpha}{r}$}
+\DisplayProof
+\end{center}
+
+\emph{Structural rule}:
+\begin{center}
+\AxiomC{$\seqd{\Gamma}{A}{\alpha_1}{r}$}
+\AxiomC{$\seqd{\Gamma,A}{C}{\alpha_2}{r}$}
+\RightLabel{$(\rm{Cut}) \quad \text{ where $r < \gr(A))$}$}
+\BinaryInfC{$\seqd{\Gamma}{C}{\alpha}{r}$}
+\DisplayProof
+\end{center}
+
+A derivation $\seqd{\Gamma}{C}{\alpha}{r}$ is cut-free if $r = 0$.
+
+\end{definition}
+
+The main properties we need to prove for $\HA_\omega$:
+
+\begin{lemma}{(Weakening)}
+If $\seqd{\Gamma}{C}{\alpha}{r}$, then $\seqd{\Gamma,\Pi}{C}{\alpha}{r}$.
+\end{lemma}
+
+\begin{lemma}{(Inversion)}
+    The following holds for some $\alpha$ and $r$:
+    \begin{enumerate}
+    \item $\seqd{A\wedge B,\Gamma}{C}{\alpha}{r}$ implies
+      $\seqd{A,B,\Gamma}{C}{\alpha}{r}$;
+    \item $\seqd{A\vee B,\Gamma}{C}{\alpha}{r}$ implies
+      $\seqd{A,\Gamma}{C}{\alpha}{r}$ and $\seqd{B,\Gamma}{C}{\alpha}{r}$;
+    \item $\seqd{A\rightarrow B,\Gamma}{C}{\alpha}{r}$ implies
+      $\seqd{B,\Gamma}{C}{\alpha}{r}$;
+    \item $\seqd{\exists x A(x),\Gamma}{C}{\alpha}{r}$ implies
+      $\seqd{\Gamma,A(t)}{C}{\alpha}{r}$ for every $t$;
+    \item $\seqd{\Gamma}{A\wedge B}{\alpha}{r}$ implies
+      $\seqd{\Gamma}{A}{\alpha}{r}$ and $\seqd{\Gamma}{B}{\alpha}{r}$;
+    \item $\seqd{\Gamma}{A\rightarrow B}{\alpha}{r}$ implies
+      $\seqd{A,\Gamma}{B}{\alpha}{r}$;
+    \item $\seqd{\Gamma}{\forall x A(x)}{\alpha}{r}$ implies
+      $\seqd{\Gamma}{A(n)}{\alpha}{r}$ for every $t$.
+    \end{enumerate}
+    $(\lor R)$, $(\exists R)$, $(\forall L)$, and $(\to L)$ are not entirely invertible.
+\end{lemma}
+
+%\begin{lemma}{(Empty sequent cannot be cut-free)}
+%    $\seqd{}{}{\alpha}{0}$ does not hold for any $\alpha$.
+%\end{lemma}
+\todo{We need to prove that we can always increase the $\alpha$ and $r$ whenever we want.}
+
+\subsection{Embedding}
+
+To prove that $\HA$ embeds into $\HA_\omega$, we will want to prove induction admissibility:
+
+\begin{lemma}{(Induction admissibility)}
+    Given $\seqd{\Gamma}{A(0)}{\alpha}{r}$ and $\seqd{\Gamma,A(x)}{A(S(x))}{\beta}{r}$, then:
+    \[ \seqd{\Gamma}{\forall x\; A(x)}{\gamma}{r}\]
+\end{lemma}
+
+However, this is not possible if our $\omega$-rule requires every term. As such we need to normalise our terms:
+
+\begin{definition}{(Normalised terms)}
+    For a closed formula $A$, we will call the normalised formula $A^*$, the result of replacing every closed term $t$ with $\val(t)$.
+    \todo{I have to be careful with the notational and semantic stuff here}
+\end{definition}
+
+Thus for $\HA_\omega$ only contain normalised formulae. \todo{There are other ways to do this, but this is the rough idea. There are some details I need to work out here.}
+
+\begin{lemma}{(Induction admissibility)}
+    Given $\seqd{\Gamma}{A(0)}{\alpha}{r}$ and $\seqd{\Gamma,A(n)}{A(S(n))}{\beta}{r}$, then:
+    \[ \seqd{\Gamma}{\forall x\; A(x)}{\max(\alpha,\beta)+\omega}{r}\]
+    where $\gr(A(n)) < r$
+\end{lemma}
+\begin{proof}
+    This is done by combining instances of the premises with cut. As an example:
+\begin{center}
+\AxiomC{$\seqd{\Gamma}{A(0)}{\max(\alpha,\beta)+1}{r}$}
+\AxiomC{$\seqd{\Gamma,A(0)}{A(1)}{\max(\alpha,\beta)+1}{r}$}
+\RightLabel{$(\rm{Cut})$}
+\BinaryInfC{$\seqd{\Gamma}{A(1)}{\max(\alpha,\beta)+1}{r}$}
+\DisplayProof
+\end{center}
+    We can maintain $\gr(A(n)) < r$ and, we see the height increases by an extra inference. Thus in general we can prove $\seqd{\Gamma}{A(n)}{\max(\alpha,\beta) + n}{r}$. Therefore with the $\omega$-rule, we can obtain $\seqd{\Gamma}{\forall x\;A(x)}{\max(\alpha,\beta) + \omega}{r}$
+\end{proof}
+
+As we observe in induction admissibility, it will be the main contribution to an increase in height when translating a proof from $\HA$ to $\HA_\omega$. Thus each induction will add an extra $\omega$ to the height of the proof when converted to a $\HA_\omega$ proof:
+
+\begin{theorem}{(Embedding)}
+    If $\seqd{\Gamma}{C}{n}{r}$ is derivable in $\HA$ with $k$ inductions, then $\seqd{\Gamma}{C}{\omega \cdot k + n}{r}$ is derivable in $\HA_\omega$. 
+\end{theorem}
+\begin{proof}
+    \todo{This proof is pretty complicated in formalisation. Might want to change the way it is phrased? This has a lot to do substitution stuff, which is pretty finicky.}
+\end{proof}
+\subsection{Rank reduction}
+Before proving rank reduction, we need the following lemma:
+\begin{lemma}{(Single-cut Rank Reduction)}
+    Let $\gr(A) = r$, $\seqd{\Gamma}{A}{\alpha}{r}$ and $\seqd{\Pi,A}{C}{\beta}{r}$, then:
+    \[ \seqd{\Gamma,\Pi}{C}{\omega \cdot (\alpha \# \beta) + \omega}{r} \]
+\end{lemma}
+For any cut-formula $A$ in a proof $\seqd{\Gamma}{C}{\alpha}{r}$ we require $\gr(A) < r$. Thus this lemma requires replacing the application of cut on $A$ to one on its subformulae. As an example, if $A = B \to B'$, suppose $A$ is principal formula on both sides of the cut. Therefore we have:
+\begin{center}
+    \AxiomC{$\seqd{\Gamma}{B}{\beta'}{r}$}
+    \AxiomC{$\seqd{\Gamma,B'}{C}{\beta'}{r}$}
+    \RightLabel{$(\to\rm{R})$}
+    \BinaryInfC{$\seqd{\Gamma,B \to B'}{C}{\beta'}{r}$}
+    \DisplayProof
+    \quad
+    \AxiomC{$\seqd{\Gamma,B}{B'}{\alpha'}{r}$}
+    \RightLabel{$(\to\rm{L})$}
+    \UnaryInfC{$\seqd{\Gamma}{B \to B'}{\alpha'}{r}$}
+    \DisplayProof
+\end{center}
+We can therefore, apply cut on the premises:
+\begin{center}
+    \AxiomC{$\seqd{\Gamma}{B}{\gamma}{r}$}
+    \AxiomC{$\seqd{\Gamma,B}{B'}{\gamma}{r}$}
+    \AxiomC{$\seqd{\Gamma,B'}{C}{\gamma}{r}$}
+    \RightLabel{$(\rm{Cut})$}
+    \BinaryInfC{$\seqd{\Gamma,B}{C}{\gamma}{r}$}
+    \RightLabel{$(\rm{Cut})$}
+    \BinaryInfC{$\seqd{\Gamma}{C}{\gamma}{r}$}
+    \DisplayProof
+\end{center}
+Therefore, we see this subproof contributes at most $\max(\alpha',\beta')+2$. If we have $n$ many $A = B \to B'$ in the proof, we can bound the whole proof with $\omega \cdot (\alpha \# \beta) + \omega$ (since $\max(\alpha,\beta) < \alpha \# \beta$). 
+
+\begin{theorem}{(Rank reduction)}
+    If $\seqd{\Gamma}{C}{\alpha}{r+1}$, then $\seqd{\Gamma}{C}{\omega^{\left(\omega^\alpha\right)}}{r}$
+\end{theorem}
+\begin{proof}
+    This is by induction on the number of inferences. \todo{The other cases are chill}. Let $A$ be the cut with $\gr(A) = r$, then we have premises:  $\seqd{\Gamma}{A}{\alpha_1}{r+1}$ and $\seqd{\Gamma,A}{C}{\alpha_2}{r+1}$ (where $\alpha_1,\alpha_2 < \alpha$). Applying the induction hypothesis on the two premises gives us: $\seqd{\Gamma}{A}{\omega^{\omega^\alpha_1}}{r}$ and $\seqd{\Gamma,A}{C}{\omega^{\omega^\alpha_2}}{r}$. We can apply our previous lemma on this to obtain: 
+    \[ \seqd{\Gamma}{C}{\omega\cdot \left(\omega^{\omega^{\alpha_1}}\#\omega^{\omega^{\alpha_2}}\right) + \omega}{r} \]
+    Since $\omega\cdot \left(\omega^{\omega^{\alpha_1}}\#\omega^{\omega^{\alpha_2}}\right) + \omega < \omega^{\left(\omega^\alpha\right)}$, our conclusion holds.
+\end{proof}
+
+\begin{theorem}{(Cut-elimination)}
+    If $\seqd{\Gamma}{C}{\alpha}{r}$, then $\seqd{\Gamma}{C}{\omega_{2r}(\alpha)}{0}$
+\end{theorem}
+\begin{proof}
+    By induction on $r$, an repeated application of Rank reduction. For the inductive step, we have $\seqd{\Gamma}{C}{\alpha}{r+1}$, then by Rank reduction $\seqd{\Gamma}{C}{\omega^{\left(\omega^\alpha\right)}}{r}$. This is equivalent to $\seqd{\Gamma}{C}{\omega_2(\alpha)}{r}$, which we apply our induction hypothesis will reduce to $\seqd{\Gamma}{C}{\omega_{2r}(\omega_2(\alpha))}{0}$. Finally this is equivalent to $\seqd{\Gamma}{C}{\omega_{2(r+1)}(\alpha)}{0}$
+\end{proof}
+
+\begin{theorem}{(No cut-free empty sequent)}
+    $\seqd{}{}{\alpha}{r}$ does not hold.
+\end{theorem}
+\begin{proof}
+    This holds by induction on number of inferences.
+\end{proof}
+
+\begin{theorem}{(Consistency of HA)}
+    $\HA$ is consistent.
+\end{theorem}
+
+\todo{Currently $\HA_\omega$ proves $\HA$ can't, but if we can change that (i.e. weaken the $\omega$-rule), then I see nowhere the proof will go wrong. And if thats the case, it seems like I can reobtain disjunction/existential property for $\HA$ and $\HA_\omega$ }
+
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: "../main"
+%%% End:

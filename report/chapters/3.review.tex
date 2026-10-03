@@ -1,0 +1,152 @@
+\chapter{Review of Consistency Proofs}
+
+There are several proofs of the consistency of $\HA$ in the literature, however, we will focus primarily on proofs developed from the Gentzen's original method for $\PA$. The two methods which we will focus on are:
+
+\begin{itemize}
+    \item \textbf{Reduction procedure}: This was used by Gentzen in his original proof of the consistency of $\PA$. The reduction procedure proves that if an inconsistency is provable, then the proofs ordinal can be indefinitely decreased. This contradicts the well-foundedness of ordinals.
+    \item \textbf{Infinitary calculus}: In 1951 Kurt Sch\"utte obtained a simpler proof \cite{SCH51} by incorporating the $\omega$-rule into the proof system. The $\omega$-rule states if $P(1), P(2), \dots$, then $\forall x\;P(x)$. Further improvements by Alvin Tait would lead to the standard presentation in modern textbooks.
+\end{itemize}
+
+Both proofs provide a different perspective into the nature of constructive arithmetic. The reduction procedure generalises to a proof of the disjunctive and existential property of Heyting Arithmetic. \todo{Add why infinitary calculus is interesting. We know it has connections to computability and programming languages via Dialectica, but something to close off this paragraph might be nice.}
+
+\section{Reduction Procedure}
+
+The reduction procedure method for proving the consistency of arithmetic has various presentations. More general results can be obtained, however, we will firstly focus on directly obtaining consistency (as seen in \cite{SID15}).
+
+The proof is by contradiction and relies on the well-foundedness of ordinals (i.e. there is no sequence of infinitely descending sequence of ordinals). A sketch is provided below:
+
+\begin{theorem}{(Reduction Procedure)}
+Let $P$ be a proof of the empty sequent. Then there is a proof of $P'$ with $o(P') < o(P)$ where $o(P)$ is the ordinal of the proof $P$.
+\end{theorem}
+
+\begin{theorem}{(Consistency)}
+    The empty sequent is not derivable.
+\end{theorem}
+\begin{proof}
+    Let $P_0$ be the proof of $\vdash$, then repeated application of the lemma provides an infinite sequence of ordinals:
+    \[ \dots < o(P_{3} < o(P_{2}) < o(P_1) < o(P_0) \]
+    Ordinals are well-founded, so such a sequence cannot exist.
+\end{proof}
+
+The proof begins by reorganising a supposed proof of the empty sequent so inference rules are applied in the order of; arithmetical rules, Induction, logical then structural rules. This allows for the discussion of the end piece of a proof.
+
+\begin{definition}{(End piece)}
+    The end piece of a proof $P$ is the set of sequents reachable upwards from the end sequent passing only through structural rules.
+\end{definition}
+
+\subsection{Steps of the reduction procedure}
+The reduction procedure of the proof is generally presented with following steps:
+
+\begin{enumerate}
+    \item Replace all free variables that aren't eigenvariables with $0$. This will still be a proof of the empty-sequent with the same ordinal.
+    \item If the end-piece contains induction, take the lowest induction and unfold the $A(t)$ in the premise (which is now a closed term) into cuts. This step lowers the ordinal.
+    \item Remove non-atomic formulae introduced by arithmetical rules (they are shown to be redundant). 
+    \item Remove initial sequents that disappeared in the end-piece.
+    \item Break down non-atomic cut formulae by finding cut where the premises are logical inferences, called a \emph{suitable cut}.
+\end{enumerate}
+
+Each of these steps contain their own subtleties and technicalities. However, all conditions to make the Step 5 work is performed precisely by Step 1-4. Step 5 can be broken into the following parts:
+\begin{itemize}
+    \item Prove the required conditions for the existence of a suitable cut (Sublemma 5.5.3).
+    \item Show Step 1-4 produces a suitable cut.
+    \item Modify the lowermost suitable cut (see Case 1).
+    \item Show the ordinal has decreased.
+\end{itemize}
+
+\subsection{Generalising the proof}
+
+While the above theorem operated purely on the empty sequent, Takeuti and Scarpellini operate on arbitrary end sequents \cite{TAK87,SCA69}.  This generalised reduction procedure means proofs can be reduced to a kind of normal form, from which they are able to obtain the Disjunction and Existential Property of HA:
+
+\begin{definition}{($\lor/\exists$-property, preliminary form)}
+    The following hold in Heyting Arithmetic:
+    \begin{itemize}
+        \item If $\vdash A \lor B$, then $\vdash A$ or $\vdash B$.
+        \item If $\vdash \exists x\;F(x)$, then there is a closed term $t$ where $\vdash F(t)$.
+    \end{itemize}
+\end{definition}
+
+To see why this fails in classical logic, we provide the following classical sentence which Raymond Smullyan calls the Drinker's Paradox (due to the possibility of reading it as \emph{''There exists a person such that if they are drinking, then everyone is drinking''}):
+\[ \vdash \exists x \; (P(x) \to \forall y \; P(y)) \]
+This can be proven to be true classically, but if there were some term $t$ that satisfied the existential, it wouldn't hold that $P(t) \to \forall y \; P(y)$ (thus perhaps this is one of the rare occasions where a particular natural language reading coincides with the intuitionistic reading). In general the disjunction and existential property does not hold for sentences like $\vdash A \to (B \lor C)$, however this can be amended by the usage of Harrop formulae:
+
+\begin{definition}{(Harrop formula)}
+    A Harrop formula is a formula that each $\lor$ or $\exists$ is in the left scope of $\to$ or $\lnot$ (e.g. $(A \lor B) \to C$ or $A \land B$)
+\end{definition}
+
+\begin{theorem}{($\lor/\exists$-property)}
+    Let $\Gamma$ contain only closed Harrop formulae, and $A,B, \exists x\; F(x)$ closed, then:
+    \begin{itemize}
+        \item $\Gamma \vdash A \lor B \iff \left(\Gamma \vdash A\right) \text{ or } \left(\Gamma \vdash B\right)$
+        \item $\Gamma \vdash  \exists x\; F(x) \iff$ there is a closed term $t$ where $\Gamma \vdash F(t)$
+    \end{itemize}
+\end{theorem}
+
+The proof manipulates the normal form obtained from the reduction procedure by seeking the last introduction of $\lor/\exists$. Scarpellini further connects the reduction procedure to cut-elimination by the $\omega$-rule. Scarpellini's theorem converts a proof $P$ in the finitary calculus to a cut-free proof $P'$ in the infinitary calculus with a smaller ordinal than $P$ (under some ordinal measure). This connection appears to be later generalised by Buchholz.
+
+\subsection{On formalisation}
+
+There are several parts of the proof here that suggest a deep-embedding is preferred:
+\begin{itemize}
+    \item The proof calls for the existence of particular inferences inside the proof (e.g. \emph{$P$ has a suitable cut})
+    \item The usage of predecessors and descendents in the proof. Step 3,4 and 5 all use this language.
+    \item Subproofs are replaced in the proof (see Lemma 5.2.2). Further Step 5's process for reducing the ordinal involves manipulating several subproofs.
+    \item The calculation of the ordinal involves comparing the nodes in the subproofs. This seems rather difficult when formalising.
+\end{itemize}
+
+\section{Infinitary Calculus}
+
+The connection supplied by Scarpellini is the indicates that a proof by an Infinitary Calculus (similar to Bryce, Schutte and Schwichtenberg) is possible. Further:
+\begin{itemize}
+    \item Mints 1978, Part I completes this proof in the fragment with only $\forall$ and $\lnot$. In §8 says that ``all the results \dots excepting Theorem 7.2, generalize (together with the proofs)'' to the full language (p. 574).
+    \item Martin-Löf 1972 proves intuitionistic propositional natural-deduction system with countable conjunction is consistent via normalisation.
+    \item Tatsuta–Berardi 2011 also provide a presentation of Heyting Arithmetic Sequent calculus, and state that its cut elimination is “well known”, citing Martin-Löf, and give no proof (p. 546).
+\end{itemize}
+
+Schwichtenberg's proof is similar to that of Bryce and Schutte, but considers the calculus with $\lor, \land, \exists, \forall$ and $\lnot$. This style of proof has three main lemmas:
+\begin{itemize}
+    \item \textbf{Embedding} - For every proof in the finitary calculus with ordinal $k$, there is a proof in the infinitary one.
+    \item \textbf{Inversion} - Inversion for $\land$ and $\forall$.
+    \item \textbf{Reduction} - This lemmas removes a single cut at the expense of increasing the height. This is repeatedly applied to achieve elimination.
+\end{itemize}
+The measures are the cut-rank and the height bound, i.e.:
+\[ \Gamma \vdash^\alpha_r C \]
+where the proof has height at most $< \alpha$ and every cut-formula has grade at most $< r$. From Schwichtenberg's proof we lack the cases of the Reduction step for $\to, \lor, \exists$. The main things that need be watched out for are cases where the de Morgan duality is relied upon. Each of the three core lemmas are seen in Mints, Schwichtenberg and Bryce. Stated formally:
+
+\begin{theorem}{(Embedding)}
+If $\Gamma \vdash C$ is derivable, then there is an equivalent
+$\Gamma \vdash^{\alpha}_{r} C$. 
+(c.f. Theorem 3.1 in Mints and Schwichtenberg 3.4.2, Bryce 10)
+\end{theorem}
+
+\begin{theorem}{(Rank Reduction)}
+If $\Gamma \vdash^{\alpha}_{r+1} C$ then
+$\Gamma \vdash^{\omega^{\omega^{\alpha}}}_{r} C$.
+
+(c.f. Mints 4, Theorem 14 in Bryce, Schwichtenberg 2.6–2.7)
+\end{theorem}
+
+\subsection{Connection to Reduction Procedure}
+\todo{Buchholz has a bridge between the two proofs}
+
+\begin{itemize}
+    \item The Disjunction/Existential Property for HA can be obtained from the Infinitary method.
+    \item But it seems to be a slightly weaker statement
+\end{itemize}
+
+\subsection{Summary}
+Compared to the Reduction Procedure, the literature for the Infinitary method is a bit more scattered:
+\begin{itemize}
+    \item Schwichtenberg provides a method for the proof in classical one-sided sequent calculus.
+    \item Tatsuta-Berardi provides an complete Sequent Calculus for Heyting Arithmetic that corresponds to to a classical one,
+    \item Mints and Martin-L\"of provides theoretical assurance that the method will work. 
+\end{itemize}
+
+\subsection{On formalisation}
+The structure of the proof does not seem to resist a purely shallow embedding. In fact, much of seems to be doable in a similar vein to how previous formalisations of G4i and G3i were done. However, this formalisation will need the cut-rank and ordinal decorations. While we cannot use a single-succedent calculus, there some minor improvements that can be made:
+\begin{itemize}
+    \item Using multisets to remove exchange.
+    \item Add weakening at each step on $\Gamma$.
+    \item Initial sequents are atoms.
+    \item Using $\bot$ instead of $\lnot$
+\end{itemize}
+

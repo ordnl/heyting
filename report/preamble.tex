@@ -1,0 +1,68 @@
+%================================
+% Packages
+%================================
+\usepackage{amssymb,amsmath,amsthm} % Generaic math symbols
+\usepackage[style=alphabetic]{biblatex} % For bibliography
+\usepackage{csquotes} % Show displayquote
+\usepackage{bussproofs} % Proof trees aka logic fractions
+\usepackage[hidelinks]{hyperref} % Hyperlink with red boxes hidden
+
+%--- Fancy chapter headings ---%
+\usepackage{lmodern} % Fix font error for chapter heading
+\usepackage{titlesec} % Modify chapter heading
+\usepackage{xcolor} % For \textcolor
+
+
+%================================
+% Fancy Chapter Headings
+%================================
+
+\titleformat{\chapter}%[display]
+{\normalfont\fontsize{25}{30}\selectfont\raggedright}% Format and size of title text
+{\llap{%
+    \rule[-6pt]{6cm}{1.3cm}\rule{6pt}{0pt}}% Black box to the left, lowered 6pt. The end rule is a horisontal space.
+  \llap{% Number also to the left, on top of the black box.
+    \fontsize{40}{44}\selectfont\textcolor{white}\thechapter\rule{10pt}{0pt}}}
+{0pt}
+{}{}
+
+% Source: https://tex.stackexchange.com/questions/391278/how-to-make-a-chapter-heading-like-this
+
+%================================
+% Operators and Commands
+%================================
+%--- System names ---%
+\newcommand{\PA}{\textsf{PA}}
+\newcommand{\HA}{\textsf{HA}}
+
+%--- Sequent calculus ---%
+\newcommand{\seq}[2]{#1 \vdash #2}
+\newcommand{\seqd}[4]{#1 \vdash^{#3}_{#4} #2}
+\DeclareMathOperator{\gr}{gr}
+\DeclareMathOperator{\val}{val}
+
+%--- Debug/Review commands ---%
+\newcommand{\todo}[1]{\textcolor{orange}{\textbf{[To do: #1]}}}
+
+%--- Miscellaneous ---%
+\def\rm#1{\ensuremath{\mathrm{#1}}}
+
+%================================
+% Theorem environments
+%================================
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+%================================
+% Biblatex
+%================================
+\addbibresource{references.bib} 
