@@ -1,6 +1,6 @@
 # Report on Consistency of Heyting Arithmetic
 
-This folder contains a report on the pen and paper proof of syntactic proofs of the consistency of Heyting arithmetic. Currently, the project discuesses:
+This folder contains a report on the pen and paper proof of syntactic proofs of the consistency of Heyting arithmetic. Currently, the project discusses:
 
 * Gentzen's Consistency via Reduction Procedure
 * Schütte's Infinitary Proof Theoretic Cut-Elimination
@@ -18,5 +18,5 @@ latexmk -pdf main.tex
 To clean auxiliary files:
 
 ```
-latexmk -c
+latexmk -C
 ```
