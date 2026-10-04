@@ -1,0 +1,39 @@
+\DeclarePairedDelimiter\dbpar{\lparen}{\rparen}
+
+\newcommand{\tikzmark}[1]{\tikz[overlay,remember picture] \node (#1) {};}
+\tikzset{
+  square arrow/.style={to path={-- ++(0,-.25) -| (\tikztotarget)}},
+  square arrow above/.style={to path={-- ++(0,.3) -| (\tikztotarget)}}
+}
+\newcommand{\topbracarrows}[3]{%
+    \tikz[overlay,remember picture]{
+        \draw[->,square arrow above,#1] ([xshift=3pt,yshift=6pt]#2.north) to ([xshift=3pt,yshift=6pt]#3.north);
+    }
+}
+\newcommand{\botbracarrows}[3]{%
+    \tikz[overlay,remember picture]{
+        \draw[->,square arrow,#1] ([xshift=3pt]#2.south) to ([xshift=3pt]#3.south);
+    }
+}
+\begin{equation*}
+    \exists x\; \dbpar{
+        P(x, a) \to \forall y\; P(y, x)
+    }
+\end{equation*}
+\[ \\ \Big\downarrow \makebox[0pt][l]{\text{ in de Bruijn indices}}\\ \]
+
+\begin{equation*}
+    \textcolor{red}{\tikzmark{0a}\exists}\; \dbpar{
+        P\dbpar{
+            \textcolor{red}{\tikzmark{0b}0}, 1
+        } \to 
+        \textcolor{blue}{\tikzmark{1a}\forall}\; P\dbpar{
+            \textcolor{blue}{\tikzmark{1b}0},
+            \textcolor{red}{\tikzmark{0c}1}
+        }
+    }
+    \botbracarrows{red}{0a}{0b}
+    \botbracarrows{red}{0a}{0c}
+    \topbracarrows{blue}{1a}{1b}
+    \vspace{1em}
+\end{equation*}

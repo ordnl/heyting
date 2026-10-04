@@ -1,41 +1,276 @@
 \chapter{Adaptation of infinitary proof}
 
-\begin{definition}{(Terms in $\HA$)}
+We begin by defining the terms in our language:
+\begin{cthdefinition}{(Terms in $\HA$)}
     We define the terms of our language recursively:
-    \begin{itemize}
-        \item $0$ is a term.
-        \item If $t, s$ are terms, then $S(t), t+s, t\cdot s$ are terms.
+    \begin{itemize}[noitemsep]
+        \item \textbf{Constants:} $0$ is a term.
+        \item \textbf{Variables:} $x_0, x_1, \dots$ are terms.
+        \item \textbf{Functions:} If $t, s$ are terms, then $S(t), t+s, t\cdot s$ are terms.
     \end{itemize}
-\end{definition}
-\begin{definition}{(Numerals, closed terms, values)}
-    \begin{itemize}
-        \item A numeral of $n \in \mathbb{N}$ is $\overline{n} := \underbrace{S(\dots S(n)))}_{\text{$n$-times}}$
-        \item A term is closed if it contains no free variables.
-        \item The value of a closed term is defined recursively:
+    We denote the set of terms with: $\terms$.
+\end{cthdefinition}
+
+Usually bound variables and free variables are distinguished here, but we be using De Bruijn indicies. De Bruijn indicies force \(\forall x \; P(x)\) and \(\forall y\; P(y)\) to have the same syntactic representation. This is helpful during formalisation:
+
+\begin{cthremark}{(De Bruijn Indicies)}
+De Bruijn indicies refer to bound variables by the scope depth (i.e. how many \(\forall/\exists\)'s deep the bound variable is), e.g.:
+
+\input{figures/debruijn}
+
+So both \(\forall x\,P(x)\) and \(\forall y\,P(y)\) are written as \(\forall\,P(0)\). However, for convenience, we will write this as \(\forall\,P(x_0)\). Thus the above formula would be written as:
+\[ \exists \left( P(x_0,x_1) \to \forall P(x_0,x_1) \right) \]
+This significantly simplifies formalisation attempts. However, for expository purposes, we will use the standard notation and assume it can be formalised with De Bruijn indicies.
+\end{cthremark}
+
+\begin{cthdefinition}{(Formula in $\HA$)}
+    We define the formulae of our language recursively:
+    \begin{itemize}[noitemsep]
+        \item $\bot$ is an atomic formula.
+        \item If $t,s$ are terms, then $t=s$ is an atomic formulae.
+        \item If $P,Q$ are formulae, then $P \land Q, P \lor Q, P \to Q, \forall P, \exists P$ are formulae.
+    \end{itemize}
+    We denote the set of formulae with: $\forms$
+\end{cthdefinition}
+It should be mentioned that at this stage formulae and terms are mere strings and bear no semantic notions. We now define special cases of our \emph{terms} and \emph{formulae}.
+
+\begin{cthdefinition}{(Closed terms \& formulae, values and true/false atoms)}
+    \begin{itemize}[noitemsep]
+        \item A variable $x_i$ is \emph{bound} if $i < k$ where $k$ is the number of enclosing quantifiers $k$. Otherwise it is \emph{free}.
+        \item A term or formula is \textbf{\emph{closed}} if it contains no free variables.
+        \item The value of a \textbf{\emph{closed term}} is defined recursively:
         \begin{itemize}
             \item $\val(0) = 0_\mathbb{N}$
             \item $\val(S(t)) = \val(t) +_\mathbb{N} 1_\mathbb{N}$
             \item $\val(t + s)) = \val(t) +_\mathbb{N} \val(s)$
             \item $\val(t \cdot s) = \val(t) \cdot_\mathbb{N} \val(s)$
         \end{itemize}
+        where $0_\mathbb{N},+_\mathbb{N},\cdot_\mathbb{N}$ denote zero, addition and multiplication in $\mathbb{N}$.
+        \item A closed atomic formula of form $s = t$ is \textbf{\emph{true}} if $\val(s)=\val(t)$, and false otherwise. $\bot$ is a \textbf{\emph{false}} atom.
     \end{itemize}
-\end{definition}
-\begin{definition}{(Formula in $\HA$)}
-    We define the formulae of our language recursively:
-    \begin{itemize}
-        \item $\bot$ is an atomic formula.
-        \item If $t,s$ are terms, then $t=s$ is an atomic formulae.
-        \item If $P,Q$ are formulae, then $P \land Q, P \lor Q, P \to Q, \forall x\; P, \exists x\; P$ are formulae
-    \end{itemize}
-    A formula without free variables is closed. \todo{Define free/bound variables properly later}
-\end{definition}
-\begin{definition}{(True and false atoms)}
-    A closed atom $s = t$ is \emph{true} if $\val(s)=\val(t)$, and false otherwise. $\bot$ is a false atom.
-\end{definition}
+\end{cthdefinition}
+An additional special case for closed terms are numerals:
+\begin{cthdefinition}{(Numerals)}
+A \emph{numeral} of $n \in \mathbb{N}$ is $\nmrl{n} := \underbrace{S(\dots S(0)))}_{\text{$n$-times}}$
+\end{cthdefinition}
+\todo{Write up substitution notation}
+\begin{cthdefinition}{(Substitution)}
+        
+\end{cthdefinition}
+
+
+\section{The finitary calculus}
+We adapt the system presented as \cite{SID15} but remove the structural rules by using using multisets and context-sharing of $\textsf{G3i}$ in \cite{TRO00}:
+
+\begin{cthdefinition}{(The system $\Gti$)}
+We define a sequent $\seq{\Gamma}{C}$ where $\Gamma$ is a multiset, $C$ is a formula. \emph{$\seq{\Gamma}{C}$ has a derivation} if it is obtained from the inference rules on the \emph{initial sequents}. In the following $C$ may be empty.
+\begin{itemize}
+\item \textbf{\emph{Initial sequents:}}
+\begin{align*}
+&\overline{\seq{\Gamma,P}{P}}\;(\textrm{Ax}) \text{ for atoms $P$ }\\
+&\overline{\seq{\Gamma,\bot}{C}}\;(\bot\textrm{L}) \text{ for any $C$}
+\end{align*}
+
+\item \textbf{\emph{Logical rules:}}
+
+% AND Right/Left
+\begin{center}
+\AxiomC{$\seq{\Gamma}{A}$}
+\AxiomC{$\seq{\Gamma}{B}$}
+\RightLabel{$(\land\rm{R})$}
+\BinaryInfC{$\seq{\Gamma}{A\land B}$}
+\DisplayProof
+\quad
+\AxiomC{$\seq{\Gamma,A,B}{C}$}
+\RightLabel{$(\land\rm{L})$}
+\UnaryInfC{$\seq{A\land B,\Gamma}{C}$}
+\DisplayProof
+\end{center}
+
+% OR Right/Left
+\begin{center}
+\AxiomC{$\seq{\Gamma}{A_i}$}
+\RightLabel{$(\lor\rm{R})$}
+\UnaryInfC{$\seq{\Gamma}{A_0 \lor A_1}$}
+\DisplayProof
+\quad
+\AxiomC{$\seq{\Gamma,A}{C}$}
+\AxiomC{$\seq{\Gamma,B}{C}$}
+\RightLabel{$(\lor\rm{L})$}
+\BinaryInfC{$\seq{A\lor B,\Gamma}{C}$}
+\DisplayProof
+\end{center}
+
+% IMP Right/Left
+\begin{center}
+\AxiomC{$\seq{\Gamma, A}{B}$}
+\RightLabel{$(\rightarrow\rm{R})$}
+\UnaryInfC{$\seq{\Gamma}{A\rightarrow B}$}
+\DisplayProof
+\quad
+\AxiomC{$\seq{\Gamma,A\rightarrow B}{A}$}
+\AxiomC{$\seq{B,\Gamma}{C}$}
+\RightLabel{$(\rightarrow\rm{L})$}
+\BinaryInfC{$\seq{\Gamma,A\rightarrow B}{C}$}
+\DisplayProof
+\end{center}
+
+% FORALL Right/Left
+\begin{center}
+\AxiomC{$\seq{\Gamma}{A(a)}$}
+\RightLabel{$(\forall\rm{R})$}
+\UnaryInfC{$\seq{\Gamma}{\forall x\,A(x)}$}
+\DisplayProof
+\quad
+\AxiomC{$\seq{\Gamma,A(t),\forall x\,A(x)}{C}$}
+\RightLabel{$(\forall\rm{L})$}
+\UnaryInfC{$\seq{\Gamma,\forall x\,A(x)}{C}$}
+\DisplayProof
+\end{center}
+
+% EXISTS Right/Left
+\begin{center}
+\AxiomC{$\seq{\Gamma}{A(t)}$}
+\RightLabel{$(\exists\rm{R})$}
+\UnaryInfC{$\seq{\Gamma}{\exists x\,A(x)}$}
+\DisplayProof
+\quad
+\AxiomC{$\Gamma,\seq{A(a)}{C}$}
+\RightLabel{$(\exists\rm{L})$}
+\UnaryInfC{$\seq{\Gamma,\exists x\,A(x)}{C}$}
+\DisplayProof
+\end{center}
+where $t$ is an arbitrary term, and $(\forall R)$ and $(\exists L)$ satisfies the eigenvariable condition (i.e. $a$ does not occur in the lower sequent.
+
+\item \textbf{\emph{Structural rules:}}
+\begin{center}
+\AxiomC{$\seq{\Gamma}{A}$}
+\AxiomC{$\seq{\Gamma,A}{C}$}
+\RightLabel{$(\rm{Cut})$}
+\BinaryInfC{$\seq{\Gamma}{C}$}
+\DisplayProof
+\end{center}
+\end{itemize}
+\end{cthdefinition}
+
+For the $\HA$ part of our system, we will use the presentation from \cite{SID15}, where axioms are replaced with rules. Furthermore, for convenience we will use the two-premise induction rule instead of the three-premise one used by Siders.
+
+\begin{cthdefinition}{(The system $\Gti+\HA$)}
+    We define $\Gti+\HA$ as $\Gti$ with the following rules adapted from \cite{SID15} added.
+\begin{itemize}
+\item \textbf{\emph{Equality rules:}}
+{\small\begin{center}
+\AxiomC{}
+\RightLabel{(\rm{Ref})}
+\UnaryInfC{$\seq{\Gamma}{t=t}$}
+\DisplayProof
+\quad
+\AxiomC{$\seq{\Gamma}{t=s}$}
+\RightLabel{(\rm{Sym})}
+\UnaryInfC{$\seq{\Gamma}{s=t}$}
+\DisplayProof
+\end{center}
+\begin{center}
+\AxiomC{$\seq{\Gamma}{t=s}$}
+\AxiomC{$\seq{\Gamma}{s=r}$}
+\RightLabel{(\rm{Tr})}
+\BinaryInfC{$\seq{\Gamma}{t=r}$}
+\DisplayProof
+\end{center}}
+
+\item \textbf{\emph{Recursion rules:}}
+\begin{center}
+\AxiomC{}
+\RightLabel{$(\rm{{+}Rec_0})$}
+\UnaryInfC{$\seq{\Gamma}{t+0 = t}$}
+\DisplayProof
+\quad
+\AxiomC{}
+\RightLabel{$(\rm{{+}Rec_{\rm{s}}})$}
+\UnaryInfC{$\seq{\Gamma}{t+S(s) = S(t+s)}$}
+\DisplayProof
+\end{center}
+\begin{center}
+\AxiomC{}
+\RightLabel{$(\rm{{\cdot}Rec_0})$}
+\UnaryInfC{$\seq{\Gamma}{t\cdot 0 = 0}$}
+\DisplayProof
+\quad
+\AxiomC{}
+\RightLabel{$(\rm{{\cdot}Rec_{\rm{s}}})$}
+\UnaryInfC{$\seq{\Gamma}{t\cdot S(s) = t\cdot s+t}$}
+\DisplayProof
+\end{center}
+
+\item \textbf{\emph{Replacement rules:}}
+{\small\begin{center}
+\AxiomC{$\seq{\Gamma}{t=s}$}
+\RightLabel{$(\rm{sRep})$}
+\UnaryInfC{$\seq{\Gamma}{S(t) = S(s)}$}
+\DisplayProof
+\end{center}
+\begin{center}
+\AxiomC{$\seq{\Gamma}{t=s}$}
+\RightLabel{$(\rm{{+}Rep_1})$}
+\UnaryInfC{$\seq{\Gamma}{t+r = s+r}$}
+\DisplayProof
+\quad
+\AxiomC{$\seq{\Gamma}{s=r}$}
+\RightLabel{$(\rm{{+}Rep_2})$}
+\UnaryInfC{$\seq{\Gamma}{t+s = t+r}$}
+\DisplayProof
+\end{center}
+\begin{center}
+\AxiomC{$\seq{\Gamma}{t=s}$}
+\RightLabel{$(\rm{{\cdot}Rep_1})$}
+\UnaryInfC{$\seq{\Gamma}{t\cdot r = s\cdot r}$}
+\DisplayProof
+\quad
+\AxiomC{$\seq{\Gamma}{s=r}$}
+\RightLabel{$(\rm{{\cdot}Rep_2})$}
+\UnaryInfC{$\seq{\Gamma}{t\cdot s = t\cdot r}$}
+\DisplayProof
+\end{center}}
+
+\item \textbf{\emph{Infinity rules:}}
+\begin{center}
+\AxiomC{$\seq{\Gamma}{S(t) = 0}$}
+\RightLabel{$(\rm{Inf}_1)$}
+\UnaryInfC{$\seq{\Gamma}{}$}
+\DisplayProof
+\quad
+\AxiomC{$\seq{\Gamma}{S(t) = S(s)}$}
+\RightLabel{$(\rm{Inf}_2)$}
+\UnaryInfC{$\seq{\Gamma}{t = s}$}
+\DisplayProof
+\end{center}
+\item \textbf{\emph{Induction:}}
+\begin{center}
+\AxiomC{$\seq{\Gamma}{A(0)}$}
+\AxiomC{$\seq{\Gamma,A(a)}{A(S(a))}$}
+\RightLabel{$(\rm{Ind})$}
+\BinaryInfC{$\seq{\Gamma}{\forall x\; A(x)}$}
+\DisplayProof
+\end{center}
+where $(\rm{Ind})$ satisfies the eigenvariable condition.
+\end{itemize}
+\end{cthdefinition}
+% Properties of G3i+HA (These seem useful, but not necessary)
+\iffalse
+\begin{cthlemma}{(Properties of $\Gti+\HA$)}
+The following hold for $\Gti+\HA$:
+\begin{itemize}[noitemsep]
+    \item \emph{Weakening:} If $\seq{\Gamma}{C}$, then $\seq{\Gamma,\Pi}{C}$.
+    \item \emph{Generalised axiom:} $\seq{\Gamma,A}{A}$ for any formula $A$.
+    \item \emph{Substitution:} If $\seq{\Gamma}{C}$, then $\seq{\Gamma[\sigma]}{C[\sigma]}$.
+\end{itemize}
+\end{cthlemma}
+\fi
 
 \section{The infinitary calculus}
-We adapt the system presented as $\textsf{IHA}$ in \cite{TAT11} and remove the structural rules by using using multisets and context-sharing similar to $\textsf{G3i}$ in \cite{TRO00}:
-\begin{definition}{(The system $\HA_\omega$)}
+We adapt the system presented as $\textsf{IHA}$ in \cite{TAT11} to align with the finitary calculus:
+
+\begin{cthdefinition}{(The system $\HA_\omega$)}
 We define a sequent $\seqd{\Gamma}{C}{\alpha}{r}$ where $\Gamma$ is a multiset, $C$ is a formula, $r \in \mathbb{N}$ and $\alpha$ an ordinal. \emph{$\Gamma \vdash^\alpha_r C$ has a derivation with maximum height $\alpha$ and with with maximum cut $r$} if it is obtained from the inference rules on the \emph{initial sequents}. In the following, $\alpha_i < \alpha$ and $C$ may be empty.
 
 \emph{Initial sequents}:
@@ -50,27 +285,27 @@ We define a sequent $\seqd{\Gamma}{C}{\alpha}{r}$ where $\Gamma$ is a multiset, 
 \begin{center}
 \AxiomC{$\seqd{\Gamma}{A}{\alpha_1}{r}$}
 \AxiomC{$\seqd{\Gamma}{B}{\alpha_2}{r}$}
-\RightLabel{$(\wedge\rm{R})$}
-\BinaryInfC{$\seqd{\Gamma}{A\wedge B}{\alpha}{r}$}
+\RightLabel{$(\land\rm{R})$}
+\BinaryInfC{$\seqd{\Gamma}{A\land B}{\alpha}{r}$}
 \DisplayProof
 \quad
 \AxiomC{$\seqd{\Gamma,A,B}{C}{\alpha_1}{r}$}
-\RightLabel{$(\wedge\rm{L})$}
-\UnaryInfC{$\seqd{A\wedge B,\Gamma}{C}{\alpha}{r}$}
+\RightLabel{$(\land\rm{L})$}
+\UnaryInfC{$\seqd{A\land B,\Gamma}{C}{\alpha}{r}$}
 \DisplayProof
 \end{center}
 
 % OR Right/Left
 \begin{center}
 \AxiomC{$\seqd{\Gamma}{A_i}{\alpha_1}{r}$}
-\RightLabel{$(\vee\rm{R})$}
-\UnaryInfC{$\seqd{\Gamma}{A_0 \vee A_1}{\alpha}{r}$}
+\RightLabel{$(\lor\rm{R})$}
+\UnaryInfC{$\seqd{\Gamma}{A_0 \lor A_1}{\alpha}{r}$}
 \DisplayProof
 \quad
 \AxiomC{$\seqd{\Gamma,A}{C}{\alpha_1}{r}$}
 \AxiomC{$\seqd{\Gamma,B}{C}{\alpha_2}{r}$}
-\RightLabel{$(\vee\rm{L})$}
-\BinaryInfC{$\seqd{A\vee B,\Gamma}{C}{\alpha}{r}$}
+\RightLabel{$(\lor\rm{L})$}
+\BinaryInfC{$\seqd{A\lor B,\Gamma}{C}{\alpha}{r}$}
 \DisplayProof
 \end{center}
 
@@ -118,33 +353,33 @@ We define a sequent $\seqd{\Gamma}{C}{\alpha}{r}$ where $\Gamma$ is a multiset, 
 \begin{center}
 \AxiomC{$\seqd{\Gamma}{A}{\alpha_1}{r}$}
 \AxiomC{$\seqd{\Gamma,A}{C}{\alpha_2}{r}$}
-\RightLabel{$(\rm{Cut}) \quad \text{ where $r < \gr(A))$}$}
+\RightLabel{$(\rm{Cut}) \quad \text{ where $r < \gr(A)$}$}
 \BinaryInfC{$\seqd{\Gamma}{C}{\alpha}{r}$}
 \DisplayProof
 \end{center}
 
 A derivation $\seqd{\Gamma}{C}{\alpha}{r}$ is cut-free if $r = 0$.
 
-\end{definition}
+\end{cthdefinition}
 
 The main properties we need to prove for $\HA_\omega$:
 
-\begin{lemma}{(Weakening)}
+\begin{cthlemma}{(Weakening)}
 If $\seqd{\Gamma}{C}{\alpha}{r}$, then $\seqd{\Gamma,\Pi}{C}{\alpha}{r}$.
-\end{lemma}
+\end{cthlemma}
 
-\begin{lemma}{(Inversion)}
+\begin{cthlemma}{(Inversion)}
     The following holds for some $\alpha$ and $r$:
     \begin{enumerate}
-    \item $\seqd{A\wedge B,\Gamma}{C}{\alpha}{r}$ implies
+    \item $\seqd{A\land B,\Gamma}{C}{\alpha}{r}$ implies
       $\seqd{A,B,\Gamma}{C}{\alpha}{r}$;
-    \item $\seqd{A\vee B,\Gamma}{C}{\alpha}{r}$ implies
+    \item $\seqd{A\lor B,\Gamma}{C}{\alpha}{r}$ implies
       $\seqd{A,\Gamma}{C}{\alpha}{r}$ and $\seqd{B,\Gamma}{C}{\alpha}{r}$;
     \item $\seqd{A\rightarrow B,\Gamma}{C}{\alpha}{r}$ implies
       $\seqd{B,\Gamma}{C}{\alpha}{r}$;
     \item $\seqd{\exists x A(x),\Gamma}{C}{\alpha}{r}$ implies
       $\seqd{\Gamma,A(t)}{C}{\alpha}{r}$ for every $t$;
-    \item $\seqd{\Gamma}{A\wedge B}{\alpha}{r}$ implies
+    \item $\seqd{\Gamma}{A\land B}{\alpha}{r}$ implies
       $\seqd{\Gamma}{A}{\alpha}{r}$ and $\seqd{\Gamma}{B}{\alpha}{r}$;
     \item $\seqd{\Gamma}{A\rightarrow B}{\alpha}{r}$ implies
       $\seqd{A,\Gamma}{B}{\alpha}{r}$;
@@ -152,65 +387,70 @@ If $\seqd{\Gamma}{C}{\alpha}{r}$, then $\seqd{\Gamma,\Pi}{C}{\alpha}{r}$.
       $\seqd{\Gamma}{A(n)}{\alpha}{r}$ for every $t$.
     \end{enumerate}
     $(\lor R)$, $(\exists R)$, $(\forall L)$, and $(\to L)$ are not entirely invertible.
-\end{lemma}
+\end{cthlemma}
 
-\begin{theorem}{(Monotonicity)}
+\begin{cththeorem}{(Monotonicity)}
     If $\seqd{\Gamma}{C}{\alpha}{r}$, $\alpha < \beta$ and $r < s$, then $\seqd{\Gamma}{C}{\beta}{s}$
-\end{theorem}
+\end{cththeorem}
 
 \section{Embedding}
 
 To prove that $\HA$ embeds into $\HA_\omega$, we will want to prove induction admissibility:
 
-\begin{lemma}{(Induction admissibility)}
+\begin{cthlemma}{(Induction admissibility)}
     Given $\seqd{\Gamma}{A(0)}{\alpha}{r}$ and $\seqd{\Gamma,A(x)}{A(S(x))}{\beta}{r}$, then:
     \[ \seqd{\Gamma}{\forall x\; A(x)}{\gamma}{r}\]
-\end{lemma}
+\end{cthlemma}
 
 However, this is not possible if our $\omega$-rule requires every term. As such we need to normalise our terms:
 
-\begin{definition}{(Normalised terms)}
+\begin{cthdefinition}{(Normalised terms)}
     For a closed formula $A$, we will call the normalised formula $A^*$, the result of replacing every closed term $t$ with $\val(t)$.
-\end{definition}
+\end{cthdefinition}
 Evaluating all the closed terms will not change the truth value of a sequent. For free variables, we will effectively move the free variables out of the object language and consider their universal closure. This is equivalent to replacing the free variables with every possible numeral:
 \begin{align*}
-    \seq{\Gamma}{a(a+b)=a^2+ab} &\rightsquigarrow \forall m,n \in \mathbb{N} \; \left( \seq{\Gamma^*}{\bar{m}(\bar{m}+\bar{n})=\bar{m}^2-\bar{n}} \right) \\
-    &\leftrightsquigarrow \seq{(\Gamma[\sigma])^*}{(a(a+b)=a^2+ab)[\sigma]}
+    \seq{\Gamma}{a(a+b)=a^2+ab} \rightsquigarrow &\forall m,n \in \mathbb{N} \; \left( \seq{\Gamma^*}{\bar{m}(\bar{m}+\bar{n})=\bar{m}^2-\bar{n}} \right) \\
+    \leftrightsquigarrow &\seq{(\Gamma[\sigma])^*}{(a(a+b)=a^2+ab)[\sigma]}
 \end{align*}
 \todo{Substitution notation}
 Thus each sequent in this embedding will be mapped to multiple sequents. By making this accommodation, we find $\HA_\omega$ with only normalised formulae has admissibility of induction:
 
-\begin{lemma}{(Induction admissibility)}
-    Given $\seqd{\Gamma}{A(0)}{\alpha}{r}$ and $\seqd{\Gamma,A(n)}{A(S(n))}{\beta}{r}$, then:
+\begin{cthlemma}{(Induction admissibility)}
+    Given $\seqd{\Gamma}{A(0)}{\alpha}{r}$ and $\forall n\in\mathbb{N}\;\left(\seqd{\Gamma,A(\nmrl{n})}{A(S(\nmrl{n}))}{\beta}{r}\right)$ where $\gr(A(x)) < r$ then:
     \[ \seqd{\Gamma}{\forall x\; A(x)}{\max(\alpha,\beta)+\omega}{r}\]
-    where $\gr(A(n)) < r$
-\end{lemma}
+\end{cthlemma}
 \begin{proof}
-    This is done by combining instances of the premises with cut. As an example:
+    Notice that we can combine instances of the premises with cut. As an example:
 \begin{center}
 \AxiomC{$\seqd{\Gamma}{A(0)}{\max(\alpha,\beta)+1}{r}$}
-\AxiomC{$\seqd{\Gamma,A(0)}{A(1)}{\max(\alpha,\beta)+1}{r}$}
+\AxiomC{$\seqd{\Gamma,A(0)}{A(\nmrl{1})}{\max(\alpha,\beta)+1}{r}$}
 \RightLabel{$(\rm{Cut})$}
-\BinaryInfC{$\seqd{\Gamma}{A(1)}{\max(\alpha,\beta)+1}{r}$}
+\BinaryInfC{$\seqd{\Gamma}{A(\nmrl{1})}{\max(\alpha,\beta)+1}{r}$}
 \DisplayProof
 \end{center}
-    We can maintain $\gr(A(n)) < r$ and, we see the height increases by an extra inference. Thus in general we can prove $\seqd{\Gamma}{A(n)}{\max(\alpha,\beta) + n}{r}$. Therefore with the $\omega$-rule, we can obtain $\seqd{\Gamma}{\forall x\;A(x)}{\max(\alpha,\beta) + \omega}{r}$
+    For each $n$, we will have to add another cut to obtain:
+    \[ \seqd{\Gamma}{A(\nmrl{n})}{\max(\alpha,\beta)+n}{r}\]
+    with $\gr(A(\nmrl{n})) < r$. Applying $\forall\rm{R}_\infty$, we obtain $\seqd{\Gamma}{\forall x\;A(x)}{\max(\alpha,\beta) + \omega}{r}$
 \end{proof}
 
 Induction will be the main contribution to an increase in height when translating a proof from $\HA$ to $\HA_\omega$. Thus each induction will add an extra $\omega$ to the height of the proof when converted to a $\HA_\omega$ proof:
 
-\begin{theorem}{(Embedding)}
+\begin{cththeorem}{(Embedding)}
     If $\seqd{\Gamma}{C}{n}{r}$ is derivable in $\HA$ with $k$ inductions, then $\seqd{(\Gamma[\sigma])^*}{(C[\sigma])^*}{\omega \cdot k + n}{r}$ is derivable in $\HA_\omega$ where $\sigma$ is any substitution of free variables for numerals.
-\end{theorem}
+\end{cththeorem}
 \begin{proof}
-    \todo{Write up}
+    By induction on the height of $\seqd{\Gamma}{C}{n}{r}$.
+    \begin{itemize}
+        \item \textbf{\emph{Initial sequents:}} If $P$ is an atom in $\seq{\Gamma,P}{P}$, then upon substitution $P[\sigma]$, we find it must become a closed atom. If it is true, then $(\rm{Ax\;R})$ obtains the desired sequent and $(\rm{Ax\;L})$ otherwise.
+        \item \textbf{\emph{Arithmetical rules:}} \todo{Write up}
+    \end{itemize}
 \end{proof}
 \section{Rank reduction}
 Before proving rank reduction, we need the following lemma:
-\begin{lemma}{(Single-cut Rank Reduction)}
+\begin{cthlemma}{(Single-cut Rank Reduction)}
     Let $\gr(A) = r$, $\seqd{\Gamma}{A}{\alpha}{r}$ and $\seqd{\Pi,A}{C}{\beta}{r}$, then:
     \[ \seqd{\Gamma,\Pi}{C}{\omega \cdot (\alpha \# \beta) + \omega}{r} \]
-\end{lemma}
+\end{cthlemma}
 For any cut-formula $A$ in a proof $\seqd{\Gamma}{C}{\alpha}{r}$ we require $\gr(A) < r$. Thus this lemma requires replacing the application of cut on $A$ to one on its subformulae. As an example, if $A = B \to B'$, suppose $A$ is principal formula on both sides of the cut. Therefore we have:
 \begin{center}
     \AxiomC{$\seqd{\Gamma}{B}{\beta'}{r}$}
@@ -237,32 +477,32 @@ We can therefore, apply cut on the premises:
 \end{center}
 Therefore, we see this subproof contributes at most $\max(\alpha',\beta')+2$. If we have $n$ many $A = B \to B'$ in the proof, we can bound the whole proof with $\omega \cdot (\alpha \# \beta) + \omega$ (since $\max(\alpha,\beta) < \alpha \# \beta$). 
 
-\begin{theorem}{(Rank reduction)}
+\begin{cththeorem}{(Rank reduction)}
     If $\seqd{\Gamma}{C}{\alpha}{r+1}$, then $\seqd{\Gamma}{C}{\omega^{\left(\omega^\alpha\right)}}{r}$
-\end{theorem}
+\end{cththeorem}
 \begin{proof}
     This is by induction on the left and right derivations. \todo{Write up the other cases (inversion lemmas helpful here)}. Let $A$ be the cut with $\gr(A) = r$, then we have premises:  $\seqd{\Gamma}{A}{\alpha_1}{r+1}$ and $\seqd{\Gamma,A}{C}{\alpha_2}{r+1}$ (where $\alpha_1,\alpha_2 < \alpha$). Applying the induction hypothesis on the two premises gives us: $\seqd{\Gamma}{A}{\omega^{\omega^\alpha_1}}{r}$ and $\seqd{\Gamma,A}{C}{\omega^{\omega^\alpha_2}}{r}$. We can apply our previous lemma on this to obtain: 
     \[ \seqd{\Gamma}{C}{\omega\cdot \left(\omega^{\omega^{\alpha_1}}\#\omega^{\omega^{\alpha_2}}\right) + \omega}{r} \]
     Since $\omega\cdot \left(\omega^{\omega^{\alpha_1}}\#\omega^{\omega^{\alpha_2}}\right) + \omega < \omega^{\left(\omega^\alpha\right)}$, our conclusion holds.
 \end{proof}
 
-\begin{theorem}{(Cut-elimination)}
+\begin{cththeorem}{(Cut-elimination)}
     If $\seqd{\Gamma}{C}{\alpha}{r}$, then $\seqd{\Gamma}{C}{\omega_{2r}(\alpha)}{0}$
-\end{theorem}
+\end{cththeorem}
 \begin{proof}
     By induction on $r$, an repeated application of Rank reduction. For the inductive step, we have $\seqd{\Gamma}{C}{\alpha}{r+1}$, then by Rank reduction $\seqd{\Gamma}{C}{\omega^{\left(\omega^\alpha\right)}}{r}$. This is equivalent to $\seqd{\Gamma}{C}{\omega_2(\alpha)}{r}$, which we apply our induction hypothesis will reduce to $\seqd{\Gamma}{C}{\omega_{2r}(\omega_2(\alpha))}{0}$. Finally this is equivalent to $\seqd{\Gamma}{C}{\omega_{2(r+1)}(\alpha)}{0}$
 \end{proof}
 
-\begin{theorem}{(No cut-free empty sequent)}
+\begin{cththeorem}{(No cut-free empty sequent)}
     $\seqd{}{}{\alpha}{r}$ does not hold.
-\end{theorem}
+\end{cththeorem}
 \begin{proof}
     This holds by induction on number of inferences.
 \end{proof}
 
-\begin{theorem}{(Consistency of HA)}
+\begin{cththeorem}{(Consistency of HA)}
     $\HA$ is consistent.
-\end{theorem}
+\end{cththeorem}
 
 \todo{Currently $\HA_\omega$ proves $\HA$ can't, but if we can change that (i.e. weaken the $\omega$-rule), then I see nowhere the proof will go wrong. And if thats the case, it seems like I can reobtain disjunction/existential property for $\HA$ and $\HA_\omega$ }
 

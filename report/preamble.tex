@@ -6,12 +6,15 @@
 \usepackage{csquotes} % Show displayquote
 \usepackage{bussproofs} % Proof trees aka logic fractions
 \usepackage[hidelinks]{hyperref} % Hyperlink with red boxes hidden
+\usepackage{coloredtheorem} % Coloured theorem boxes
+\usepackage{enumitem} % Reduce separation in itemize
+\usepackage{mathtools} % For DeclarePairedDelimiter in debruijn.tex
+\usepackage{mathabx} % For \widebar for numerals
 
 %--- Fancy chapter headings ---%
 \usepackage{lmodern} % Fix font error for chapter heading
 \usepackage{titlesec} % Modify chapter heading
 \usepackage{xcolor} % For \textcolor
-
 
 %================================
 % Fancy Chapter Headings
@@ -29,17 +32,63 @@
 % Source: https://tex.stackexchange.com/questions/391278/how-to-make-a-chapter-heading-like-this
 
 %================================
+% Fancy Theorem Environments
+%================================
+
+\cthnewtheorem{theorem}{Theorem}[enhanced, coltitle=blue!30!black, 
+                                colback=blue!5,
+                                frame hidden, boxrule=0pt,
+                                attach title to upper={\\[0.5ex]}, 
+                                borderline west={1mm}{-2mm}{blue!50!black}]
+                                
+\cthnewtheorem{definition}{Definition}[coltitle=white, colback=red!5,
+                                 colframe=red!40!black]
+                                
+\cthnewtheorem{lemma}{Lemma}[enhanced, coltitle=green!30!black, 
+                                colbacktitle=green!10, colback=green!10,
+                                frame hidden, boxrule=0pt,
+                                attach title to upper={\\[0.5ex]}, 
+                                borderline west={1mm}{-2mm}{green!60!black}]
+
+\cthnewtheorem{corollary}{Corollary}[enhanced, coltitle=yellow!30!black, 
+                                colbacktitle=yellow!10, colback=yellow!10,
+                                frame hidden, boxrule=0pt,
+                                attach title to upper={\\[0.5ex]}, 
+                                borderline west={1mm}{-2mm}{yellow!60!black}]
+                                
+\cthnewtheorem{example}{Example}[coltitle=black, colback=black!5,
+                                 colframe=black!30]
+                                 
+\cthnewtheorem{remark}{Remark}[enhanced, coltitle=black, 
+                                colbacktitle=gray!10, colback=gray!10,
+                                frame hidden, boxrule=0pt,
+                                attach title to upper={\\[0.5ex]}, 
+                                borderline west={1mm}{-2mm}{gray!60!black}]
+
+\cthnewtheorem{algorithm}{Algorithm}[coltitle=black, colback=yellow!10,
+                                     colframe=black!15]
+
+% Source: https://github.com/joaomlourenco/coloredtheorem
+
+
+%================================
 % Operators and Commands
 %================================
 %--- System names ---%
 \newcommand{\PA}{\textsf{PA}}
 \newcommand{\HA}{\textsf{HA}}
+\newcommand{\Gti}{\textsf{G3i}}
+
+%--- Formal language and substitution ---%
+\newcommand{\terms}{\textsf{term}}
+\newcommand{\forms}{\textsf{form}}
 
 %--- Sequent calculus ---%
 \newcommand{\seq}[2]{#1 \vdash #2}
 \newcommand{\seqd}[4]{#1 \vdash^{#3}_{#4} #2}
 \DeclareMathOperator{\gr}{gr}
 \DeclareMathOperator{\val}{val}
+\newcommand{\nmrl}[1]{\widebar{#1}}
 
 %--- Debug/Review commands ---%
 \newcommand{\todo}[1]{\textcolor{orange}{\textbf{[To do: #1]}}}
