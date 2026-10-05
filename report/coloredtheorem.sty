@@ -24,6 +24,25 @@
 
 \gdef\tcbth{cth}
 
+%% [CUSTOMIZATION FOR HEYTING]
+%% Determine the highest available section counter.
+%% - book/report: uses \chapter (c@chapter)
+%% - article: uses \section (c@section)
+%% - slides: uses \frame (c@frame) or \section
+%% - fallback for other classes: uses \part (c@part).
+%% Store result in \tcbth@basecounter.
+\def\tcbth@basecounter{}
+\@ifundefined{c@chapter}{%
+  \@ifundefined{c@section}{%
+    \@ifundefined{c@frame}{%
+      \@ifundefined{c@part}{%
+        % No parent counter found
+      }{\def\tcbth@basecounter{part}}%
+    }{\def\tcbth@basecounter{frame}}%
+  }{\def\tcbth@basecounter{section}}%
+}{\def\tcbth@basecounter{chapter}}
+%% [END CUSTOMIZATION]
+
 \NewDocumentCommand{\TcbthNewDocumentCommand}{m}{%
     \expandafter\NewDocumentCommand\csname\tcbth#1\endcsname}
 \NewDocumentCommand{\TcbthNewDocumentEnvironment}{m}{%
@@ -32,8 +51,27 @@
     \expandafter\gdef\csname#1#2\endcsname{#3}}
 
 \TcbthNewDocumentCommand{newtheorem} { m m O{} }{%
-  \expandafter\newcounter\expandafter{\tcbth#1}%
-  \TcbthGdef{#1name}{#2}%
+  %% [EDIT ON MON 5 OCT]
+  %% The following line was commented out and removed because it created 
+  %% a flat, unindexed counter (resulting in just "Theorem 1", "Theorem 2").
+  %%
+  %% % \expandafter\newcounter\expandafter{\tcbth#1}%
+  %%
+  %% Replaced with the new logic below: we check if a base counter (like chapter 
+  %% or section) was found by the preamble logic above. If yes, we bind the new 
+  %% theorem counter to it via the optional argument of \newcounter, and redefine 
+  %% the \the<counter> format to prepend the base counter (yielding formats like 
+  %% "1.1"). If no base counter exists (e.g., in a letter), we just default to 
+  %% the original unindexed counter behavior.
+  \ifx\tcbth@basecounter\empty
+    \expandafter\newcounter\expandafter{\tcbth#1}%
+  \else
+    \expandafter\newcounter\expandafter{\tcbth#1}[\tcbth@basecounter]%
+    \expandafter\gdef\csname the\tcbth#1\endcsname{%
+      \csname the\tcbth@basecounter\endcsname.\arabic{\tcbth#1}}%
+  \fi
+  %% [END EDIT]
+\TcbthGdef{#1name}{#2}%
   \TcbthGdef{list#1name}{List of #2s}%
   \TcbthGdef[]{#1autorefname}{#2}%
   \AtEndPreamble{%
@@ -46,7 +84,10 @@
   }
   \TcbthNewDocumentEnvironment{#1} {O{} m O{}}%
   {% \begin{tcb<SOMETHING>}
-    \begin{center}%
+    %% [CUSTOMIZATION FOR HEYTING]
+    %% We remove the \begin{center} since it makes an extra vertical spacing.
+    % \begin{center}%
+    %% [END CUSTOMIZATION]
       \ifx\relax##2\relax
       \else
         \expandafter\refstepcounter\expandafter{\tcbth#1}%
@@ -69,11 +110,16 @@
       \ignorespaces%
   }{% \end{tcb<SOMETHING>}
        \end{tcolorbox}%
-     \end{center}%
+     %% [CUSTOMIZATION FOR HEYTING]
+     %% We removed \end{center} as above
+     % \end{center}%
+     %% [END CUSTOMIZATION]
   }%
   \TcbthNewDocumentEnvironment{#1*} {O{} m O{}}%
   {% \begin{tcb<SOMETHING>}
-    \begin{center}%
+    %% [CUSTOMIZATION FOR HEYTING]
+    % \begin{center}%
+    %% [END CUSTOMIZATION]
       \begin{tcolorbox}[breakable,lowerbox=ignored,left=0mm,right=0mm,top=0mm,bottom=0mm,
                         title={\textbf{\csname\tcbth#1name\endcsname}~~##2},
                         #3, ##3,
@@ -83,6 +129,9 @@
       \ignorespaces%
   }{% \end{tcb<SOMETHING>}
        \end{tcolorbox}%
-     \end{center}%
+     %% [CUSTOMIZATION FOR HEYTING]
+     %% Commented out \end{center} to match the removal of \begin{center} above.
+     % \end{center}%
+     %% [END CUSTOMIZATION]
   }%
 }

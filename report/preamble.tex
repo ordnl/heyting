@@ -10,6 +10,7 @@
 \usepackage{enumitem} % Reduce separation in itemize
 \usepackage{mathtools} % For DeclarePairedDelimiter in debruijn.tex
 \usepackage{mathabx} % For \widebar for numerals
+\usepackage{microtype} % Fix some overfull hboxes
 
 %--- Fancy chapter headings ---%
 \usepackage{lmodern} % Fix font error for chapter heading
@@ -80,8 +81,18 @@
 \newcommand{\Gti}{\textsf{G3i}}
 
 %--- Formal language and substitution ---%
-\newcommand{\terms}{\textsf{term}}
-\newcommand{\forms}{\textsf{form}}
+\newcommand{\nat}{\mathbb{N}}
+\newcommand{\term}{\textsf{term}}
+\newcommand{\form}{\textsf{form}}
+\DeclareMathOperator{\FV}{FV}
+\DeclareMathOperator{\BV}{BV}
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\shift}{\uparrow}
+\DeclareMathOperator{\pred}{pred}
+\newcommand{\cons}[2]{\operatorname{cons}(#1,#2)}
+\DeclareMathOperator{\scom}{\circ}
+\DeclareMathOperator{\swap}{\sigma_{0,1}}
+\DeclareMathOperator{\up}{\;\Uparrow}
 
 %--- Sequent calculus ---%
 \newcommand{\seq}[2]{#1 \vdash #2}
@@ -115,3 +126,8 @@
 % Biblatex
 %================================
 \addbibresource{references.bib} 
+
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: "main"
+%%% End:

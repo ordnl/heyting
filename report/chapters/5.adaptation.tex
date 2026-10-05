@@ -1,286 +1,19 @@
-\chapter{Adaptation of infinitary proof}
+\chapter{Fusion of several consistency proofs}
 
-We begin by defining the terms in our language:
-\begin{cthdefinition}{(Terms in $\HA$)}
-    We define the terms of our language recursively:
-    \begin{itemize}[noitemsep]
-        \item \textbf{Constants:} $0$ is a term.
-        \item \textbf{Variables:} $x_0, x_1, \dots$ are terms.
-        \item \textbf{Functions:} If $t, s$ are terms, then $S(t), t+s, t\cdot s$ are terms.
-    \end{itemize}
-    We denote the set of terms with: $\terms$.
-\end{cthdefinition}
-
-Usually bound variables and free variables are distinguished here, but we be using De Bruijn indicies. De Bruijn indicies force \(\forall x \; P(x)\) and \(\forall y\; P(y)\) to have the same syntactic representation. This is helpful during formalisation:
-
-\begin{cthremark}{(De Bruijn Indicies)}
-De Bruijn indicies refer to bound variables by the scope depth (i.e. how many \(\forall/\exists\)'s deep the bound variable is), e.g.:
-
-\input{figures/debruijn}
-
-So both \(\forall x\,P(x)\) and \(\forall y\,P(y)\) are written as \(\forall\,P(0)\). However, for convenience, we will write this as \(\forall\,P(x_0)\). Thus the above formula would be written as:
-\[ \exists \left( P(x_0,x_1) \to \forall P(x_0,x_1) \right) \]
-This significantly simplifies formalisation attempts. However, for expository purposes, we will use the standard notation and assume it can be formalised with De Bruijn indicies.
-\end{cthremark}
-
-\begin{cthdefinition}{(Formula in $\HA$)}
-    We define the formulae of our language recursively:
-    \begin{itemize}[noitemsep]
-        \item $\bot$ is an atomic formula.
-        \item If $t,s$ are terms, then $t=s$ is an atomic formulae.
-        \item If $P,Q$ are formulae, then $P \land Q, P \lor Q, P \to Q, \forall P, \exists P$ are formulae.
-    \end{itemize}
-    We denote the set of formulae with: $\forms$
-\end{cthdefinition}
-It should be mentioned that at this stage formulae and terms are mere strings and bear no semantic notions. We now define special cases of our \emph{terms} and \emph{formulae}.
-
-\begin{cthdefinition}{(Closed terms \& formulae, values and true/false atoms)}
-    \begin{itemize}[noitemsep]
-        \item A variable $x_i$ is \emph{bound} if $i < k$ where $k$ is the number of enclosing quantifiers $k$. Otherwise it is \emph{free}.
-        \item A term or formula is \textbf{\emph{closed}} if it contains no free variables.
-        \item The value of a \textbf{\emph{closed term}} is defined recursively:
-        \begin{itemize}
-            \item $\val(0) = 0_\mathbb{N}$
-            \item $\val(S(t)) = \val(t) +_\mathbb{N} 1_\mathbb{N}$
-            \item $\val(t + s)) = \val(t) +_\mathbb{N} \val(s)$
-            \item $\val(t \cdot s) = \val(t) \cdot_\mathbb{N} \val(s)$
-        \end{itemize}
-        where $0_\mathbb{N},+_\mathbb{N},\cdot_\mathbb{N}$ denote zero, addition and multiplication in $\mathbb{N}$.
-        \item A closed atomic formula of form $s = t$ is \textbf{\emph{true}} if $\val(s)=\val(t)$, and false otherwise. $\bot$ is a \textbf{\emph{false}} atom.
-    \end{itemize}
-\end{cthdefinition}
-An additional special case for closed terms are numerals:
-\begin{cthdefinition}{(Numerals)}
-A \emph{numeral} of $n \in \mathbb{N}$ is $\nmrl{n} := \underbrace{S(\dots S(0)))}_{\text{$n$-times}}$
-\end{cthdefinition}
-\todo{Write up substitution notation}
-\begin{cthdefinition}{(Substitution)}
-        
-\end{cthdefinition}
-
-
-\section{The finitary calculus}
-We adapt the system presented as \cite{SID15} but remove the structural rules by using using multisets and context-sharing of $\textsf{G3i}$ in \cite{TRO00}:
-
-\begin{cthdefinition}{(The system $\Gti$)}
-We define a sequent $\seq{\Gamma}{C}$ where $\Gamma$ is a multiset, $C$ is a formula. \emph{$\seq{\Gamma}{C}$ has a derivation} if it is obtained from the inference rules on the \emph{initial sequents}. In the following $C$ may be empty.
-\begin{itemize}
-\item \textbf{\emph{Initial sequents:}}
-\begin{align*}
-&\overline{\seq{\Gamma,P}{P}}\;(\textrm{Ax}) \text{ for atoms $P$ }\\
-&\overline{\seq{\Gamma,\bot}{C}}\;(\bot\textrm{L}) \text{ for any $C$}
-\end{align*}
-
-\item \textbf{\emph{Logical rules:}}
-
-% AND Right/Left
-\begin{center}
-\AxiomC{$\seq{\Gamma}{A}$}
-\AxiomC{$\seq{\Gamma}{B}$}
-\RightLabel{$(\land\rm{R})$}
-\BinaryInfC{$\seq{\Gamma}{A\land B}$}
-\DisplayProof
-\quad
-\AxiomC{$\seq{\Gamma,A,B}{C}$}
-\RightLabel{$(\land\rm{L})$}
-\UnaryInfC{$\seq{A\land B,\Gamma}{C}$}
-\DisplayProof
-\end{center}
-
-% OR Right/Left
-\begin{center}
-\AxiomC{$\seq{\Gamma}{A_i}$}
-\RightLabel{$(\lor\rm{R})$}
-\UnaryInfC{$\seq{\Gamma}{A_0 \lor A_1}$}
-\DisplayProof
-\quad
-\AxiomC{$\seq{\Gamma,A}{C}$}
-\AxiomC{$\seq{\Gamma,B}{C}$}
-\RightLabel{$(\lor\rm{L})$}
-\BinaryInfC{$\seq{A\lor B,\Gamma}{C}$}
-\DisplayProof
-\end{center}
-
-% IMP Right/Left
-\begin{center}
-\AxiomC{$\seq{\Gamma, A}{B}$}
-\RightLabel{$(\rightarrow\rm{R})$}
-\UnaryInfC{$\seq{\Gamma}{A\rightarrow B}$}
-\DisplayProof
-\quad
-\AxiomC{$\seq{\Gamma,A\rightarrow B}{A}$}
-\AxiomC{$\seq{B,\Gamma}{C}$}
-\RightLabel{$(\rightarrow\rm{L})$}
-\BinaryInfC{$\seq{\Gamma,A\rightarrow B}{C}$}
-\DisplayProof
-\end{center}
-
-% FORALL Right/Left
-\begin{center}
-\AxiomC{$\seq{\Gamma}{A(a)}$}
-\RightLabel{$(\forall\rm{R})$}
-\UnaryInfC{$\seq{\Gamma}{\forall x\,A(x)}$}
-\DisplayProof
-\quad
-\AxiomC{$\seq{\Gamma,A(t),\forall x\,A(x)}{C}$}
-\RightLabel{$(\forall\rm{L})$}
-\UnaryInfC{$\seq{\Gamma,\forall x\,A(x)}{C}$}
-\DisplayProof
-\end{center}
-
-% EXISTS Right/Left
-\begin{center}
-\AxiomC{$\seq{\Gamma}{A(t)}$}
-\RightLabel{$(\exists\rm{R})$}
-\UnaryInfC{$\seq{\Gamma}{\exists x\,A(x)}$}
-\DisplayProof
-\quad
-\AxiomC{$\Gamma,\seq{A(a)}{C}$}
-\RightLabel{$(\exists\rm{L})$}
-\UnaryInfC{$\seq{\Gamma,\exists x\,A(x)}{C}$}
-\DisplayProof
-\end{center}
-where $t$ is an arbitrary term, and $(\forall R)$ and $(\exists L)$ satisfies the eigenvariable condition (i.e. $a$ does not occur in the lower sequent.
-
-\item \textbf{\emph{Structural rules:}}
-\begin{center}
-\AxiomC{$\seq{\Gamma}{A}$}
-\AxiomC{$\seq{\Gamma,A}{C}$}
-\RightLabel{$(\rm{Cut})$}
-\BinaryInfC{$\seq{\Gamma}{C}$}
-\DisplayProof
-\end{center}
-\end{itemize}
-\end{cthdefinition}
-
-For the $\HA$ part of our system, we will use the presentation from \cite{SID15}, where axioms are replaced with rules. Furthermore, for convenience we will use the two-premise induction rule instead of the three-premise one used by Siders.
-
-\begin{cthdefinition}{(The system $\Gti+\HA$)}
-    We define $\Gti+\HA$ as $\Gti$ with the following rules adapted from \cite{SID15} added.
-\begin{itemize}
-\item \textbf{\emph{Equality rules:}}
-{\small\begin{center}
-\AxiomC{}
-\RightLabel{(\rm{Ref})}
-\UnaryInfC{$\seq{\Gamma}{t=t}$}
-\DisplayProof
-\quad
-\AxiomC{$\seq{\Gamma}{t=s}$}
-\RightLabel{(\rm{Sym})}
-\UnaryInfC{$\seq{\Gamma}{s=t}$}
-\DisplayProof
-\end{center}
-\begin{center}
-\AxiomC{$\seq{\Gamma}{t=s}$}
-\AxiomC{$\seq{\Gamma}{s=r}$}
-\RightLabel{(\rm{Tr})}
-\BinaryInfC{$\seq{\Gamma}{t=r}$}
-\DisplayProof
-\end{center}}
-
-\item \textbf{\emph{Recursion rules:}}
-\begin{center}
-\AxiomC{}
-\RightLabel{$(\rm{{+}Rec_0})$}
-\UnaryInfC{$\seq{\Gamma}{t+0 = t}$}
-\DisplayProof
-\quad
-\AxiomC{}
-\RightLabel{$(\rm{{+}Rec_{\rm{s}}})$}
-\UnaryInfC{$\seq{\Gamma}{t+S(s) = S(t+s)}$}
-\DisplayProof
-\end{center}
-\begin{center}
-\AxiomC{}
-\RightLabel{$(\rm{{\cdot}Rec_0})$}
-\UnaryInfC{$\seq{\Gamma}{t\cdot 0 = 0}$}
-\DisplayProof
-\quad
-\AxiomC{}
-\RightLabel{$(\rm{{\cdot}Rec_{\rm{s}}})$}
-\UnaryInfC{$\seq{\Gamma}{t\cdot S(s) = t\cdot s+t}$}
-\DisplayProof
-\end{center}
-
-\item \textbf{\emph{Replacement rules:}}
-{\small\begin{center}
-\AxiomC{$\seq{\Gamma}{t=s}$}
-\RightLabel{$(\rm{sRep})$}
-\UnaryInfC{$\seq{\Gamma}{S(t) = S(s)}$}
-\DisplayProof
-\end{center}
-\begin{center}
-\AxiomC{$\seq{\Gamma}{t=s}$}
-\RightLabel{$(\rm{{+}Rep_1})$}
-\UnaryInfC{$\seq{\Gamma}{t+r = s+r}$}
-\DisplayProof
-\quad
-\AxiomC{$\seq{\Gamma}{s=r}$}
-\RightLabel{$(\rm{{+}Rep_2})$}
-\UnaryInfC{$\seq{\Gamma}{t+s = t+r}$}
-\DisplayProof
-\end{center}
-\begin{center}
-\AxiomC{$\seq{\Gamma}{t=s}$}
-\RightLabel{$(\rm{{\cdot}Rep_1})$}
-\UnaryInfC{$\seq{\Gamma}{t\cdot r = s\cdot r}$}
-\DisplayProof
-\quad
-\AxiomC{$\seq{\Gamma}{s=r}$}
-\RightLabel{$(\rm{{\cdot}Rep_2})$}
-\UnaryInfC{$\seq{\Gamma}{t\cdot s = t\cdot r}$}
-\DisplayProof
-\end{center}}
-
-\item \textbf{\emph{Infinity rules:}}
-\begin{center}
-\AxiomC{$\seq{\Gamma}{S(t) = 0}$}
-\RightLabel{$(\rm{Inf}_1)$}
-\UnaryInfC{$\seq{\Gamma}{}$}
-\DisplayProof
-\quad
-\AxiomC{$\seq{\Gamma}{S(t) = S(s)}$}
-\RightLabel{$(\rm{Inf}_2)$}
-\UnaryInfC{$\seq{\Gamma}{t = s}$}
-\DisplayProof
-\end{center}
-\item \textbf{\emph{Induction:}}
-\begin{center}
-\AxiomC{$\seq{\Gamma}{A(0)}$}
-\AxiomC{$\seq{\Gamma,A(a)}{A(S(a))}$}
-\RightLabel{$(\rm{Ind})$}
-\BinaryInfC{$\seq{\Gamma}{\forall x\; A(x)}$}
-\DisplayProof
-\end{center}
-where $(\rm{Ind})$ satisfies the eigenvariable condition.
-\end{itemize}
-\end{cthdefinition}
-% Properties of G3i+HA (These seem useful, but not necessary)
-\iffalse
-\begin{cthlemma}{(Properties of $\Gti+\HA$)}
-The following hold for $\Gti+\HA$:
-\begin{itemize}[noitemsep]
-    \item \emph{Weakening:} If $\seq{\Gamma}{C}$, then $\seq{\Gamma,\Pi}{C}$.
-    \item \emph{Generalised axiom:} $\seq{\Gamma,A}{A}$ for any formula $A$.
-    \item \emph{Substitution:} If $\seq{\Gamma}{C}$, then $\seq{\Gamma[\sigma]}{C[\sigma]}$.
-\end{itemize}
-\end{cthlemma}
-\fi
-
-\section{The infinitary calculus}
+\section{The infinitary system}
 We adapt the system presented as $\textsf{IHA}$ in \cite{TAT11} to align with the finitary calculus:
 
 \begin{cthdefinition}{(The system $\HA_\omega$)}
 We define a sequent $\seqd{\Gamma}{C}{\alpha}{r}$ where $\Gamma$ is a multiset, $C$ is a formula, $r \in \mathbb{N}$ and $\alpha$ an ordinal. \emph{$\Gamma \vdash^\alpha_r C$ has a derivation with maximum height $\alpha$ and with with maximum cut $r$} if it is obtained from the inference rules on the \emph{initial sequents}. In the following, $\alpha_i < \alpha$ and $C$ may be empty.
-
-\emph{Initial sequents}:
+\begin{itemize}
+\item \textbf{\emph{Initial sequents:}}
 \begin{align*}
 &\overline{\seqd{\Gamma}{P}{\alpha}{r}}\;(\rm{Ax\;R}) \text{ for true atoms $P$ and } \\
 &\overline{\seqd{\Gamma, P}{C}{\alpha}{r}}\;(\rm{Ax\;L}) \text{ for false atoms $P$}
 \end{align*}
 
-\emph{Logical rules}:
-
+\item \textbf{\emph{Logical rules:}}
+{\small
 % AND Right/Left
 \begin{center}
 \AxiomC{$\seqd{\Gamma}{A}{\alpha_1}{r}$}
@@ -347,9 +80,8 @@ We define a sequent $\seqd{\Gamma}{C}{\alpha}{r}$ where $\Gamma$ is a multiset, 
 \RightLabel{$(\exists\rm{L}_\infty)$}
 \UnaryInfC{$\seqd{\Gamma,\exists x\,A(x)}{C}{\alpha}{r}$}
 \DisplayProof
-\end{center}
-
-\emph{Structural rule}:
+\end{center}}
+\item \textbf{\emph{Structural rule:}}
 \begin{center}
 \AxiomC{$\seqd{\Gamma}{A}{\alpha_1}{r}$}
 \AxiomC{$\seqd{\Gamma,A}{C}{\alpha_2}{r}$}
@@ -357,8 +89,9 @@ We define a sequent $\seqd{\Gamma}{C}{\alpha}{r}$ where $\Gamma$ is a multiset, 
 \BinaryInfC{$\seqd{\Gamma}{C}{\alpha}{r}$}
 \DisplayProof
 \end{center}
-
+\end{itemize}
 A derivation $\seqd{\Gamma}{C}{\alpha}{r}$ is cut-free if $r = 0$.
+
 
 \end{cthdefinition}
 

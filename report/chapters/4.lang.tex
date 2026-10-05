@@ -1,0 +1,432 @@
+\chapter{The Logical Syntax of the Language}
+
+We begin by defining a terms in our language:
+\begin{cthdefinition}{(Terms in $\HA$)}
+    We define a \textbf{term} in our language recursively:
+    \begin{itemize}[noitemsep]
+        \item \emph{Constants:} $0$ is a term.
+        \item \emph{Variables:} $x_0, x_1, \dots$ are terms.
+        \item \emph{Functions:} If $t, s$ are terms, then $S(t), t+s, t\cdot s$ are terms.
+    \end{itemize}
+    Furthermore, we denote the set of terms with: $\term$.
+\end{cthdefinition}
+As per convention, we will denote \textbf{\emph{free}} variables with $a_i$ and \textbf{\emph{bound}} variables with $x_i$. We will denote the set of free variables in a formula $A$ or term $t$ with $\FV(A)$ and $\FV(t)$ and bound variables with $\BV(A)$ and $\BV(t)$. In the following section we will make this notion more precise. In fact we will make it more precise than most people would want as it constitutes an important part of formalisation.
+
+\begin{cthdefinition}{(Formula in $\HA$)}
+    We define a \textbf{formula} of our language recursively:
+    \begin{itemize}[noitemsep]
+        \item $\bot$ is an atomic formula.
+        \item If $t,s$ are terms, then $t=s$ is an atomic formulae.
+        \item If $P,Q$ are formulae, then $P \land Q, P \lor Q, P \to Q, \forall P, \exists P$ are formulae.
+    \end{itemize}
+    We denote the set of formulae with: $\form$
+\end{cthdefinition}
+It should be mentioned that at this stage formulae and terms are mere strings and bear no semantic notions. We now define special cases of our \emph{terms} and \emph{formulae}.
+\begin{cthdefinition}{(Closed terms/formulae, values and true/false atoms)}
+  \begin{itemize}[noitemsep]  
+        \item A formula $A$ or term $t$ is \textbf{\emph{closed}} if $\FV(A) = \varnothing$ or $\FV(t) = \varnothing$.
+        \item The value of a \textbf{\emph{closed term}} is defined recursively:
+        \begin{itemize}
+            \item $\val(0) = 0_\mathbb{N}$
+            \item $\val(S(t)) = \val(t) +_\mathbb{N} 1_\mathbb{N}$
+            \item $\val(t + s)) = \val(t) +_\mathbb{N} \val(s)$
+            \item $\val(t \cdot s) = \val(t) \cdot_\mathbb{N} \val(s)$
+        \end{itemize}
+        where $0_\mathbb{N},+_\mathbb{N},\cdot_\mathbb{N}$ denote zero, addition and multiplication in $\mathbb{N}$.
+        \item A closed atomic formula of form $s = t$ is \textbf{\emph{true}} if $\val(s)=\val(t)$, and false otherwise. $\bot$ is a \textbf{\emph{false}} atom.
+    \end{itemize}
+\end{cthdefinition}
+An additional special case for closed terms are numerals:
+\begin{cthdefinition}{(Numerals)}
+A \textbf{\emph{numeral}} of $n \in \mathbb{N}$ is $\nmrl{n} := \underbrace{S(\dots S(0)))}_{\text{$n$-times}}$
+\end{cthdefinition}
+As an example:
+\begin{cthexample}{(Example of numerals and values)}
+  We currently have closed atomic formulae: $\nmrl{1} + \nmrl{1} = \nmrl{2}$ (equivalently $S(0) + S(0) = S(S(0))$).
+  Further it we find $\val(\nmrl{1}+\nmrl{1})$ evaluates to $2$.
+\end{cthexample}
+
+Our earlier definition for formulae and terms is not the standard one. We will, however, use the more standard convention for clarity in many situations:
+\begin{cthremark}{(Standard Variable Convention)}
+  The usual definition for formulae and terms are as follows:
+  \begin{itemize}[noitemsep]
+    \item Terms do not include bound variables (i.e. terms are constants, free variables and functions).
+    \item Quantifiers would be defined with the following:
+      \begin{align*}
+        &\text{If $A \in \form$, $a \in \FV(A)$ and $x \not\in \BV(A)$,} \\
+        &\text{then $\forall x\; A[a:=x], \exists x\; A[a:=x] \in \form$}
+      \end{align*}
+      where $A[s:=t]$ denotes the substition of all occurrences of a term $s$ in $A$ with $t$ (informally written as $A(t)$).
+  \end{itemize}
+  This is similar to what is usually called \emph{Barendregt's Variable Convention}.
+\end{cthremark}
+
+The side requirements $a \in \FV(A), x \not\in \BV(A)$ cause some friction when formalising. In later sections, we will want to be able to swap variables (e.g.: if $F(a)$, then $F(b)$). This can be formalised with the above notation as: $F[a:=b]$. However under the naive substitution, described earlier, can cause problems in formulae involving quantifiers. \emph{Variable capture} is an undesirable substitution that modifies the semantics of the original formula.
+
+\begin{cthexample}{Variable capture}
+Consider the following example with a ``naive'' substitution:
+\[ (\forall x\; P(x,a)) [a := x] = \forall x\; P(x, x) \]
+Here the semantics of the sentence has been modified by the substitution and the variable in the replacement (i.e.~\(\forall x\; P(x,\mathbf{x})\)) has been ``captured'' by the quantifier.
+\end{cthexample}
+
+Another minor (but consequential problem in formalisation) is the fact that \(\forall x \; P(x)\) and \(\forall y\; P(y)\) do no have the same syntactic representation but are equivalent in a sense (sometimes called $\alpha$-equivalent). These are problems identical to ones faced in Programming Language Theory, in the form of binders of lambda calculus (i.e. $(\lambda x. x+a)$ the function that sums $x$ with $a$). De Bruijn indices solve this problem while also providing a solution to both these problems by providing a normal form for these expressions.
+
+\section{Syntax Only a Compiler Could Love}
+Exposition on De Bruijn indices is dominated by application in lambda calculi, we provide a brief exposition for applications in logic.
+\begin{cthremark}{(De Bruijn Indices, informally)}
+De Bruijn indices refer to bound variables by the scope depth (i.e. how many \(\forall/\exists\)'s deep the bound variable is), e.g.:
+
+\input{figures/debruijn}
+
+So both \(\forall x\,P(x)\) and \(\forall y\,P(y)\) are written as \(\forall\,P(0)\). For convenience, we will write this as \(\forall\,P(x_0)\). Thus the above formula would be written as:
+\[ \exists \left( P(x_0,x_1) \to \forall P(x_0,x_1) \right) \]
+\end{cthremark}
+Under this notation, free and bound variables are not distinguished by defining two ``sorts'' of variables. Rather they are embedded in the syntax:
+\begin{cthdefinition}{(Free and bound variables)}
+  A variable $x_i$ is \textbf{\emph{bound}} if $i < k$ where $k$ is the number of enclosing quantifiers $k$. Otherwise it is \textbf{\emph{free}}.
+\end{cthdefinition}
+This definition is helpful for conceptualizing the convention. The following sections will build the required machinery to build \emph{capture-avoiding substitution}.
+
+\subsection{Term substitution}
+
+We define substitution on term in as in \cite{STA19,STA20}:
+
+\begin{cthdefinition}{(De Bruijn Substitution)}
+  Any function $\sigma: \nat \to \term$ is called a \textbf{De Bruijn Substitution} (or paralllel substitution). We can interpret these as an infinite sequences or stream of terms:
+  \[ (\sigma(0), \sigma(1), \dots) \]
+\end{cthdefinition}
+
+De Bruijn substitutions are substitutions that only replace variables. They will be managed so they only modify free variables.
+
+\begin{cthdefinition}{(Term substitutions)}
+We denote a \textbf{term substitution} with \(t [ \sigma ]\) where:
+\begin{itemize}[noitemsep,topsep=0pt]
+\item \emph{Constants:} \(0 [ \sigma ] = 0\)
+\item \emph{Variables:} \(x_i [ \sigma ] = \sigma(i)\)
+\item \emph{Functions:} For terms $t_0, t_1$: \begin{itemize}[noitemsep,topsep=0pt]
+    \item $S(t_0)[\sigma] = S(t_0[\sigma])$ and
+    \item \((f_i(t_0, t_1)) [\sigma] = f_i(t_0[\sigma], t_1[\sigma])\)
+      for $f_i \in \{ +, \cdot \}$
+  \end{itemize}
+\end{itemize}
+\end{cthdefinition}
+
+\begin{cthdefinition}{(Basic term substitutions)}
+The following term substitutions will be used often:
+\begin{itemize}[noitemsep,topsep=0pt]
+  \item \textbf{\emph{Shift:}} \(\shift(i) = x_{i + 1}\) or as a sequence $\shift = (x_1, x_2, \dots)$
+  \item \textbf{\emph{Identity:}} \(\id(n) = x_i\) or as a sequence $\id = (x_0, x_1, \dots)$
+\end{itemize}
+\end{cthdefinition}
+
+Here the \emph{shift} simply increments all the variables by one. Thus is effectively a successor on variables. Interpreting these as operations on sequences, we see shifting as moving $(x_0, x_1, \dots)$ to $(x_1, x_2, \dots)$. The interpretation as a sequence suggests an ``appending'' operation:
+
+\begin{cthdefinition}{(Stream Constructor/Extension)}
+  Let $t$ be a term and $\sigma$ a substitution \(\sigma\), then an \textbf{extension} of a substitution (or stream constructor), denoted with \(\cons{t}{\sigma}(n)\), is defined recursively:
+  \begin{itemize}[noitemsep,topsep=0pt]
+  \item \(\cons{t}{\sigma}(0) = t\)
+  \item \(\cons{t}{\sigma}(n + 1) = \sigma(n)\)
+  \end{itemize}
+  As a sequence this is \(\cons{t}{\sigma} = (t, \sigma(0), \sigma(1), \dots)\)
+\end{cthdefinition}
+
+We will use the following notation for the composition of terms:
+\begin{cthdefinition}{(Term substitution composition notation)}
+  We define \((\sigma \scom \tau)(n) = \tau(n)[\sigma]\) as the substitution composition
+\end{cthdefinition}
+
+Some basic identities for term substitution are the following:
+\begin{cththeorem}{(Properties of term substitutions)}
+  The follow properties hold for any term $f$, and substitution $f,g$:
+  \begin{itemize}[noitemsep,topsep=0pt]
+  \item \emph{(Identity)} $t[\id] = t$
+  \item \emph{(Composition)} $(t[g])[f] = t[f \scom g]$
+  \end{itemize}
+\end{cththeorem}
+
+
+\subsection{Binding and formula substitution}
+
+We define the following substitution:
+
+\begin{cthdefinition}{(Binding variable $x_0$)}
+  We define \(B(t) = \cons{t}{\id}\) or as a sequence $B(t) = (t, x_0, x_1, \dots)$.
+
+  Intuitively, this substitutes $x_0$ with a term \(t\). This is also written as \((x_0 := t)\) or \(t/x_0\), however, when manipulating the substitution itself, we will use \(B(t)\).
+\end{cthdefinition}
+
+
+It should be noted that this definition \(\cons{x_0}{\id}\) decrements variables. We can see this when it is expressed as the sequence \(( x_0, x_0, x_1, x_2, x_3, \dots )\). It follows that \(\cons{x_0}{\id}(i)\) is the variable predecessor \(\pred'(i) = x_{i - 1}\). We see \(\cons{t}{\id}\) is the left inverse
+of the variable successor (or shift):
+\[ \cons{t}{\id} \scom \shift = B(t) \scom \shift = \id \]
+
+The last substitution required for defining capture-avoiding substitution is the lift:
+\begin{cthdefinition}{(Lifting)}
+We define \textbf{lifting} as: \(\up(\sigma) = \cons{x_0}{\shift \scom \sigma}\)
+\end{cthdefinition}
+
+This finally allows us to define a capture-avoiding substitution.
+
+\begin{cthdefinition}{(Formula substitution)}
+We denote a \textbf{formula substitution} with \(\varphi [ \sigma ]\) where:
+\begin{itemize}[noitemsep,topsep=0pt]
+\item \emph{Atoms:} \((P_i(t_1, \dots, t_n))[ \sigma ] = P_i(t_1[ \sigma ], \dots, t_n[ \sigma ])\)
+\item \emph{Bottom:} \(\bot [ \sigma ] = \bot\)
+\item \emph{And:} \((\varphi \land \psi)[ \sigma ] = \varphi[\sigma] \land \psi[\sigma]\)
+\item \emph{Or:} \((\varphi \lor \psi)[ \sigma ] = \varphi[\sigma] \lor \psi[\sigma]\)
+\item \emph{Implies:} \((\varphi \to \psi)[ \sigma ] = \varphi[\sigma] \to \psi[\sigma]\)
+\item \emph{For all:} \((\forall\;\varphi)[ \sigma ] = \forall\;(\varphi[\up(\sigma)])\)
+\item \emph{Exists:} \((\exists\;\varphi)[ \sigma ] = \exists\;(\varphi[\up(\sigma)])\)
+\end{itemize}
+\end{cthdefinition}
+
+\begin{cthexample}{Capture-avoiding substitution}
+  Consider the earlier example but with the capture-avoiding substitution. Firstly suppose our formula is encoded as \(\forall P(x_0, x_1)\), and our substitution \((y := x)\). To replace $x_1$ with $x_0$, one might initially try: \(\sigma = (x_0, x_0, x_1, x_2, \dots)\). Evaluating $\up$ we find:
+  {\small\begin{align*}
+    \up(\sigma) &= \cons{x_0}{\shift \scom \sigma} \\
+                &= (x_0, \sigma(0)[\shift], \sigma(1)[\shift], \dots) \\
+                &= (x_0, x_1, x_1, x_2, \dots)
+  \end{align*}}
+  Thereby preventing variable capture:
+  {\small\begin{align*}
+    (\forall P(x_0, x_1)) [\sigma] &= \forall\; P(x_0[\up(\sigma)], x_1[\up(\sigma)]) \\
+                                  &= \forall\; P(x_0, x_1)
+  \end{align*}}
+\end{cthexample}
+
+The above example is $B(x_0)$ in disguise:
+
+\begin{cthexample}{Capture-avoiding substitution with binding}
+  In our formalism, we will use \(B(t)\) for binding. As such an alternative way to describe our previous example is the following:
+    {\small\begin{align*}
+    \up(B(t)) &= \cons{x_0}{\shift \scom B(t)} \\
+                &= (x_0, B(t)(0)[\shift], B(t)(1)[\shift], \dots) \\
+                &= (x_0, t[\shift], x_0[\shift], x_1[\shift], \dots)  \\
+                &= (x_0, t[\shift], x_1, x_2, \dots)
+    \end{align*}}
+    As such, we avoid variable capture similarly:
+    {\small\begin{align*}
+      (\forall\; P(x_0, x_1)) [ B(t) ]
+      &= \forall\; \left( P(x_0, x_1) [ \up(B(t)) ] \right) \\
+      &= \forall\; \left( P(x_0, x_1) [ \cons{x_0}{\shift \scom B(t)} ] \right) \\
+      &= \forall\; \left( P(x_0, t[\shift] \right)
+    \end{align*}}
+    Notice, that setting \(t = x_0\) gives us the example from the variable capture example, however, this time we can see \(\shift\) makes capture impossible.
+\end{cthexample}
+
+\break
+
+\section{The finitary system}
+We adapt the system presented as \cite{SID15} but remove the structural rules by using using multisets and context-sharing of $\textsf{G3i}$ in \cite{TRO00}:
+
+\begin{cthdefinition}{(The system $\Gti$)}
+We define a sequent $\seq{\Gamma}{C}$ where $\Gamma$ is a multiset, $C$ is a formula. \emph{$\seq{\Gamma}{C}$ has a derivation} if it is obtained from the inference rules on the \emph{initial sequents}. In the following $C$ may be empty.
+\begin{itemize}
+\item \textbf{\emph{Initial sequents:}}
+\begin{align*}
+&\overline{\seq{\Gamma,P}{P}}\;(\textrm{Ax}) \text{ for atoms $P$ }\\
+&\overline{\seq{\Gamma,\bot}{C}}\;(\bot\textrm{L}) \text{ for any $C$}
+\end{align*}
+
+\item \textbf{\emph{Logical rules:}}
+
+% AND Right/Left
+\begin{center}
+\AxiomC{$\seq{\Gamma}{A}$}
+\AxiomC{$\seq{\Gamma}{B}$}
+\RightLabel{$(\land\rm{R})$}
+\BinaryInfC{$\seq{\Gamma}{A\land B}$}
+\DisplayProof
+\quad
+\AxiomC{$\seq{\Gamma,A,B}{C}$}
+\RightLabel{$(\land\rm{L})$}
+\UnaryInfC{$\seq{A\land B,\Gamma}{C}$}
+\DisplayProof
+\end{center}
+
+% OR Right/Left
+\begin{center}
+\AxiomC{$\seq{\Gamma}{A_i}$}
+\RightLabel{$(\lor\rm{R})$}
+\UnaryInfC{$\seq{\Gamma}{A_0 \lor A_1}$}
+\DisplayProof
+\quad
+\AxiomC{$\seq{\Gamma,A}{C}$}
+\AxiomC{$\seq{\Gamma,B}{C}$}
+\RightLabel{$(\lor\rm{L})$}
+\BinaryInfC{$\seq{A\lor B,\Gamma}{C}$}
+\DisplayProof
+\end{center}
+
+% IMP Right/Left
+\begin{center}
+\AxiomC{$\seq{\Gamma, A}{B}$}
+\RightLabel{$(\rightarrow\rm{R})$}
+\UnaryInfC{$\seq{\Gamma}{A\rightarrow B}$}
+\DisplayProof
+\quad
+\AxiomC{$\seq{\Gamma,A\rightarrow B}{A}$}
+\AxiomC{$\seq{B,\Gamma}{C}$}
+\RightLabel{$(\rightarrow\rm{L})$}
+\BinaryInfC{$\seq{\Gamma,A\rightarrow B}{C}$}
+\DisplayProof
+\end{center}
+
+% FORALL Right/Left
+\begin{center}
+\AxiomC{$\seq{\Gamma}{A(a)}$}
+\RightLabel{$(\forall\rm{R})$}
+\UnaryInfC{$\seq{\Gamma}{\forall x\,A(x)}$}
+\DisplayProof
+\quad
+\AxiomC{$\seq{\Gamma,A(t),\forall x\,A(x)}{C}$}
+\RightLabel{$(\forall\rm{L})$}
+\UnaryInfC{$\seq{\Gamma,\forall x\,A(x)}{C}$}
+\DisplayProof
+\end{center}
+
+% EXISTS Right/Left
+\begin{center}
+\AxiomC{$\seq{\Gamma}{A(t)}$}
+\RightLabel{$(\exists\rm{R})$}
+\UnaryInfC{$\seq{\Gamma}{\exists x\,A(x)}$}
+\DisplayProof
+\quad
+\AxiomC{$\Gamma,\seq{A(a)}{C}$}
+\RightLabel{$(\exists\rm{L})$}
+\UnaryInfC{$\seq{\Gamma,\exists x\,A(x)}{C}$}
+\DisplayProof
+\end{center}
+where $t$ is an arbitrary term, and $(\forall R)$ and $(\exists L)$ satisfies the eigenvariable condition (i.e. $a$ does not occur in the lower sequent.
+
+\item \textbf{\emph{Structural rules:}}
+\begin{center}
+\AxiomC{$\seq{\Gamma}{A}$}
+\AxiomC{$\seq{\Gamma,A}{C}$}
+\RightLabel{$(\rm{Cut})$}
+\BinaryInfC{$\seq{\Gamma}{C}$}
+\DisplayProof
+\end{center}
+\end{itemize}
+\end{cthdefinition}
+
+For the $\HA$ part of our system, we will use the presentation from \cite{SID15}, where axioms are replaced with rules. Furthermore, for convenience we will use the two-premise induction rule instead of the three-premise one used by Siders.
+
+\begin{cthdefinition}{(The system $\Gti+\HA$)}
+    We define $\Gti+\HA$ as $\Gti$ with the following rules adapted from \cite{SID15} added.
+\begin{itemize}
+\item \textbf{\emph{Equality rules:}}
+{\small\begin{center}
+\AxiomC{}
+\RightLabel{(\rm{Ref})}
+\UnaryInfC{$\seq{\Gamma}{t=t}$}
+\DisplayProof
+\quad
+\AxiomC{$\seq{\Gamma}{t=s}$}
+\RightLabel{(\rm{Sym})}
+\UnaryInfC{$\seq{\Gamma}{s=t}$}
+\DisplayProof
+\end{center}
+\begin{center}
+\AxiomC{$\seq{\Gamma}{t=s}$}
+\AxiomC{$\seq{\Gamma}{s=r}$}
+\RightLabel{(\rm{Tr})}
+\BinaryInfC{$\seq{\Gamma}{t=r}$}
+\DisplayProof
+\end{center}}
+
+\item \textbf{\emph{Recursion rules:}}
+\begin{center}
+\AxiomC{}
+\RightLabel{$(\rm{{+}Rec_0})$}
+\UnaryInfC{$\seq{\Gamma}{t+0 = t}$}
+\DisplayProof
+\quad
+\AxiomC{}
+\RightLabel{$(\rm{{+}Rec_{\rm{s}}})$}
+\UnaryInfC{$\seq{\Gamma}{t+S(s) = S(t+s)}$}
+\DisplayProof
+\end{center}
+\begin{center}
+\AxiomC{}
+\RightLabel{$(\rm{{\cdot}Rec_0})$}
+\UnaryInfC{$\seq{\Gamma}{t\cdot 0 = 0}$}
+\DisplayProof
+\quad
+\AxiomC{}
+\RightLabel{$(\rm{{\cdot}Rec_{\rm{s}}})$}
+\UnaryInfC{$\seq{\Gamma}{t\cdot S(s) = t\cdot s+t}$}
+\DisplayProof
+\end{center}
+
+\item \textbf{\emph{Replacement rules:}}
+{\small\begin{center}
+\AxiomC{$\seq{\Gamma}{t=s}$}
+\RightLabel{$(\rm{sRep})$}
+\UnaryInfC{$\seq{\Gamma}{S(t) = S(s)}$}
+\DisplayProof
+\end{center}
+\begin{center}
+\AxiomC{$\seq{\Gamma}{t=s}$}
+\RightLabel{$(\rm{{+}Rep_1})$}
+\UnaryInfC{$\seq{\Gamma}{t+r = s+r}$}
+\DisplayProof
+\quad
+\AxiomC{$\seq{\Gamma}{s=r}$}
+\RightLabel{$(\rm{{+}Rep_2})$}
+\UnaryInfC{$\seq{\Gamma}{t+s = t+r}$}
+\DisplayProof
+\end{center}
+\begin{center}
+\AxiomC{$\seq{\Gamma}{t=s}$}
+\RightLabel{$(\rm{{\cdot}Rep_1})$}
+\UnaryInfC{$\seq{\Gamma}{t\cdot r = s\cdot r}$}
+\DisplayProof
+\quad
+\AxiomC{$\seq{\Gamma}{s=r}$}
+\RightLabel{$(\rm{{\cdot}Rep_2})$}
+\UnaryInfC{$\seq{\Gamma}{t\cdot s = t\cdot r}$}
+\DisplayProof
+\end{center}}
+
+\item \textbf{\emph{Infinity rules:}}
+\begin{center}
+\AxiomC{$\seq{\Gamma}{S(t) = 0}$}
+\RightLabel{$(\rm{Inf}_1)$}
+\UnaryInfC{$\seq{\Gamma}{}$}
+\DisplayProof
+\quad
+\AxiomC{$\seq{\Gamma}{S(t) = S(s)}$}
+\RightLabel{$(\rm{Inf}_2)$}
+\UnaryInfC{$\seq{\Gamma}{t = s}$}
+\DisplayProof
+\end{center}
+\item \textbf{\emph{Induction:}}
+\begin{center}
+\AxiomC{$\seq{\Gamma}{A(0)}$}
+\AxiomC{$\seq{\Gamma,A(a)}{A(S(a))}$}
+\RightLabel{$(\rm{Ind})$}
+\BinaryInfC{$\seq{\Gamma}{\forall x\; A(x)}$}
+\DisplayProof
+\end{center}
+where $(\rm{Ind})$ satisfies the eigenvariable condition.
+\end{itemize}
+\end{cthdefinition}
+% Properties of G3i+HA (These seem useful, but not necessary)
+\iffalse
+\begin{cthlemma}{(Properties of $\Gti+\HA$)}
+The following hold for $\Gti+\HA$:
+\begin{itemize}[noitemsep]
+    \item \emph{Weakening:} If $\seq{\Gamma}{C}$, then $\seq{\Gamma,\Pi}{C}$.
+    \item \emph{Generalised axiom:} $\seq{\Gamma,A}{A}$ for any formula $A$.
+    \item \emph{Substitution:} If $\seq{\Gamma}{C}$, then $\seq{\Gamma[\sigma]}{C[\sigma]}$.
+\end{itemize}
+\end{cthlemma}
+\fi
+
+
+  
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: "../main"
+%%% End:

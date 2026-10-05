@@ -1,4 +1,4 @@
-# Report on Consistency of Heyting Arithmetic
+# Report on the Consistency of Heyting Arithmetic
 
 This folder contains a report on the pen and paper proof of syntactic proofs of the consistency of Heyting arithmetic. Currently, the project discusses:
 

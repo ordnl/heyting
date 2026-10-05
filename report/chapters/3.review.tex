@@ -1,4 +1,4 @@
-\chapter{Review of Consistency Proofs}
+\chapter{Versions of the consistency proof}
 
 There are several proofs of the consistency of $\HA$ in the literature, however, we will focus primarily on proofs developed from the Gentzen's original method for $\PA$. The two methods which we will focus on are:
 
@@ -15,13 +15,13 @@ The reduction procedure method for proving the consistency of arithmetic has var
 
 The proof is by contradiction and relies on the well-foundedness of ordinals (i.e. there is no sequence of infinitely descending sequence of ordinals). A sketch is provided below:
 
-\begin{theorem}{(Reduction Procedure)}
+\begin{cththeorem}{(Reduction Procedure)}
 Let $P$ be a proof of the empty sequent. Then there is a proof of $P'$ with $o(P') < o(P)$ where $o(P)$ is the ordinal of the proof $P$.
-\end{theorem}
+\end{cththeorem}
 
-\begin{theorem}{(Consistency)}
+\begin{cththeorem}{(Consistency)}
     The empty sequent is not derivable.
-\end{theorem}
+\end{cththeorem}
 \begin{proof}
     Let $P_0$ be the proof of $\vdash$, then repeated application of the lemma provides an infinite sequence of ordinals:
     \[ \dots < o(P_{3} < o(P_{2}) < o(P_1) < o(P_0) \]
@@ -30,9 +30,9 @@ Let $P$ be a proof of the empty sequent. Then there is a proof of $P'$ with $o(P
 
 The proof begins by reorganising a supposed proof of the empty sequent so inference rules are applied in the order of; arithmetical rules, Induction, logical then structural rules. This allows for the discussion of the end piece of a proof.
 
-\begin{definition}{(End piece)}
+\begin{cthdefinition}{(End piece)}
     The end piece of a proof $P$ is the set of sequents reachable upwards from the end sequent passing only through structural rules.
-\end{definition}
+\end{cthdefinition}
 
 \subsection{Steps of the reduction procedure}
 The reduction procedure of the proof is generally presented with following steps:
@@ -57,29 +57,29 @@ Each of these steps contain their own subtleties and technicalities. However, al
 
 While the above theorem operated purely on the empty sequent, Takeuti and Scarpellini operate on arbitrary end sequents \cite{TAK87,SCA69}.  This generalised reduction procedure means proofs can be reduced to a kind of normal form, from which they are able to obtain the Disjunction and Existential Property of HA:
 
-\begin{definition}{($\lor/\exists$-property, preliminary form)}
+\begin{cthdefinition}{($\lor/\exists$-property, preliminary form)}
     The following hold in Heyting Arithmetic:
     \begin{itemize}
         \item If $\vdash A \lor B$, then $\vdash A$ or $\vdash B$.
         \item If $\vdash \exists x\;F(x)$, then there is a closed term $t$ where $\vdash F(t)$.
     \end{itemize}
-\end{definition}
+\end{cthdefinition}
 
 To see why this fails in classical logic, we provide the following classical sentence which Raymond Smullyan calls the Drinker's Paradox (due to the possibility of reading it as \emph{''There exists a person such that if they are drinking, then everyone is drinking''}):
 \[ \vdash \exists x \; (P(x) \to \forall y \; P(y)) \]
 This can be proven to be true classically, but if there were some term $t$ that satisfied the existential, it wouldn't hold that $P(t) \to \forall y \; P(y)$ (thus perhaps this is one of the rare occasions where a particular natural language reading coincides with the intuitionistic reading). In general the disjunction and existential property does not hold for sentences like $\vdash A \to (B \lor C)$, however this can be amended by the usage of Harrop formulae:
 
-\begin{definition}{(Harrop formula)}
+\begin{cthdefinition}{(Harrop formula)}
     A Harrop formula is a formula that each $\lor$ or $\exists$ is in the left scope of $\to$ or $\lnot$ (e.g. $(A \lor B) \to C$ or $A \land B$)
-\end{definition}
+\end{cthdefinition}
 
-\begin{theorem}{($\lor/\exists$-property)}
+\begin{cththeorem}{($\lor/\exists$-property)}
     Let $\Gamma$ contain only closed Harrop formulae, and $A,B, \exists x\; F(x)$ closed, then:
     \begin{itemize}
         \item $\Gamma \vdash A \lor B \iff \left(\Gamma \vdash A\right) \text{ or } \left(\Gamma \vdash B\right)$
         \item $\Gamma \vdash  \exists x\; F(x) \iff$ there is a closed term $t$ where $\Gamma \vdash F(t)$
     \end{itemize}
-\end{theorem}
+\end{cththeorem}
 
 The proof manipulates the normal form obtained from the reduction procedure by seeking the last introduction of $\lor/\exists$. Scarpellini further connects the reduction procedure to cut-elimination by the $\omega$-rule. Scarpellini's theorem converts a proof $P$ in the finitary calculus to a cut-free proof $P'$ in the infinitary calculus with a smaller ordinal than $P$ (under some ordinal measure). This connection appears to be later generalised by Buchholz.
 
@@ -112,18 +112,18 @@ The measures are the cut-rank and the height bound, i.e.:
 \[ \Gamma \vdash^\alpha_r C \]
 where the proof has height at most $< \alpha$ and every cut-formula has grade at most $< r$. From Schwichtenberg's proof we lack the cases of the Reduction step for $\to, \lor, \exists$. The main things that need be watched out for are cases where the de Morgan duality is relied upon. Each of the three core lemmas are seen in Mints, Schwichtenberg and Bryce. Stated formally:
 
-\begin{theorem}{(Embedding)}
+\begin{cththeorem}{(Embedding)}
 If $\Gamma \vdash C$ is derivable, then there is an equivalent
 $\Gamma \vdash^{\alpha}_{r} C$. 
 (c.f. Theorem 3.1 in Mints and Schwichtenberg 3.4.2, Bryce 10)
-\end{theorem}
+\end{cththeorem}
 
-\begin{theorem}{(Rank Reduction)}
+\begin{cththeorem}{(Rank Reduction)}
 If $\Gamma \vdash^{\alpha}_{r+1} C$ then
 $\Gamma \vdash^{\omega^{\omega^{\alpha}}}_{r} C$.
 
 (c.f. Mints 4, Theorem 14 in Bryce, Schwichtenberg 2.6–2.7)
-\end{theorem}
+\end{cththeorem}
 
 \subsection{Connection to Reduction Procedure}
 \todo{Buchholz has a bridge between the two proofs}
@@ -150,3 +150,8 @@ The structure of the proof does not seem to resist a purely shallow embedding. I
     \item Using $\bot$ instead of $\lnot$
 \end{itemize}
 
+
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: "../main"
+%%% End:
