@@ -1,0 +1,5 @@
+-Q theories HA
+
+theories/Autosubst/core.v
+theories/Autosubst/unscoped.v
+theories/Autosubst/Formulas.v
