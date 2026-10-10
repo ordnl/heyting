@@ -101,6 +101,7 @@ The main properties we need to prove for $\HA_\omega$:
 If $\seqd{\Gamma}{C}{\alpha}{r}$, then $\seqd{\Gamma,\Pi}{C}{\alpha}{r}$.
 \end{cthlemma}
 
+\iffalse
 \begin{cthlemma}{(Inversion)}
     The following holds for some $\alpha$ and $r$:
     \begin{enumerate}
@@ -120,7 +121,8 @@ If $\seqd{\Gamma}{C}{\alpha}{r}$, then $\seqd{\Gamma,\Pi}{C}{\alpha}{r}$.
       $\seqd{\Gamma}{A(n)}{\alpha}{r}$ for every $t$.
     \end{enumerate}
     $(\lor R)$, $(\exists R)$, $(\forall L)$, and $(\to L)$ are not entirely invertible.
-\end{cthlemma}
+  \end{cthlemma}
+\fi
 
 \begin{cththeorem}{(Monotonicity)}
     If $\seqd{\Gamma}{C}{\alpha}{r}$, $\alpha < \beta$ and $r < s$, then $\seqd{\Gamma}{C}{\beta}{s}$
@@ -128,11 +130,12 @@ If $\seqd{\Gamma}{C}{\alpha}{r}$, then $\seqd{\Gamma,\Pi}{C}{\alpha}{r}$.
 
 \section{Embedding}
 
+\subsection{Induction admissibility}
+
 To prove that $\HA$ embeds into $\HA_\omega$, we will want to prove induction admissibility:
 
 \begin{cthlemma}{(Induction admissibility)}
-    Given $\seqd{\Gamma}{A(0)}{\alpha}{r}$ and $\seqd{\Gamma,A(x)}{A(S(x))}{\beta}{r}$, then:
-    \[ \seqd{\Gamma}{\forall x\; A(x)}{\gamma}{r}\]
+    Given $\seqd{\Gamma}{A(0)}{\alpha}{r}$ and $\seqd{\Gamma,A(x)}{A(S(x))}{\beta}{r}$, then: $\seqd{\Gamma}{\forall x\; A(x)}{\gamma}{r}$
 \end{cthlemma}
 
 However, this is not possible if our $\omega$-rule requires every term. As such we need to normalise our terms:
@@ -145,7 +148,6 @@ Evaluating all the closed terms will not change the truth value of a sequent. Fo
     \seq{\Gamma}{a(a+b)=a^2+ab} \rightsquigarrow &\forall m,n \in \mathbb{N} \; \left( \seq{\Gamma^*}{\bar{m}(\bar{m}+\bar{n})=\bar{m}^2-\bar{n}} \right) \\
     \leftrightsquigarrow &\seq{(\Gamma[\sigma])^*}{(a(a+b)=a^2+ab)[\sigma]}
 \end{align*}
-\todo{Substitution notation}
 Thus each sequent in this embedding will be mapped to multiple sequents. By making this accommodation, we find $\HA_\omega$ with only normalised formulae has admissibility of induction:
 
 \begin{cthlemma}{(Induction admissibility)}
@@ -161,10 +163,54 @@ Thus each sequent in this embedding will be mapped to multiple sequents. By maki
 \BinaryInfC{$\seqd{\Gamma}{A(\nmrl{1})}{\max(\alpha,\beta)+1}{r}$}
 \DisplayProof
 \end{center}
-    For each $n$, we will have to add another cut to obtain:
+    By induction on $n$, we will have to add another cut to obtain:
     \[ \seqd{\Gamma}{A(\nmrl{n})}{\max(\alpha,\beta)+n}{r}\]
     with $\gr(A(\nmrl{n})) < r$. Applying $\forall\rm{R}_\infty$, we obtain $\seqd{\Gamma}{\forall x\;A(x)}{\max(\alpha,\beta) + \omega}{r}$
 \end{proof}
+
+
+\subsection{Arithmetical admissibility}
+
+The majority of this section is obtained from $(\rm{Ax\;R})$ and $(\rm{Ax\;L})$.  
+
+\begin{cthlemma}{(Equality rules are admissible)}
+  $(\rm{Ref})$, $(\rm{Tr})$ and $(\rm{Sym})$ are admissible for closed terms.
+\end{cthlemma}
+\begin{proof}
+  As an example for transitivity, we prove this by induction on the height of the proof, and obtain the results semantically:
+  \begin{center}
+    \AxiomC{$\seq{\Gamma}{t=s}$}
+    \AxiomC{$\seq{\Gamma}{s=r}$}
+    \RightLabel{(\rm{Tr})}
+    \BinaryInfC{$\seq{\Gamma}{t=r}$}
+    \DisplayProof
+  \end{center}
+Since $\seq{\Gamma}{t = r}$ is a closed formula, it is either a true or false atom. If it is a true atom, then we are done. Otherwise, if $t = r$ is a false atom, then by the soundness of the equality rules we find $\seq{\Gamma}{}$ must be provable. From which we can derive $\seq{\Gamma}{t = r}$ by weakening.
+\end{proof}
+
+\begin{cthlemma}{(Recursion rules are admissible)}
+  Recursion rules are admissible for closed terms.
+\end{cthlemma}
+\begin{proof}
+  For closed terms, the succedent of recursion rules form true atoms, thus by $(\rm{Ax\;R})$ proves each of them.
+\end{proof}
+
+\begin{cthlemma}{(Replacement rules are admissible)}
+  $(\rm{sRep})$, $(\rm{+Rep_1})$, $(\rm{+Rep_2})$, $(\rm{\cdot Rep_1})$ and $(\rm{\cdot Rep_2})$ are admissible for closed terms.
+\end{cthlemma}
+\begin{proof}
+  This is obtained in a way similar to the equality rules.
+\end{proof}
+
+
+\begin{cthlemma}{(Infinity rules are admissible)}
+  $(\rm{Inf}_1)$ and $(\rm{Inf}_2)$ are admissible for closed terms.
+\end{cthlemma}
+\begin{proof}
+  These are obtained in a similar way to the previous rules.
+\end{proof}
+
+\subsection{Embedding theorem}
 
 Induction will be the main contribution to an increase in height when translating a proof from $\HA$ to $\HA_\omega$. Thus each induction will add an extra $\omega$ to the height of the proof when converted to a $\HA_\omega$ proof:
 
@@ -175,7 +221,16 @@ Induction will be the main contribution to an increase in height when translatin
     By induction on the height of $\seqd{\Gamma}{C}{n}{r}$.
     \begin{itemize}
         \item \textbf{\emph{Initial sequents:}} If $P$ is an atom in $\seq{\Gamma,P}{P}$, then upon substitution $P[\sigma]$, we find it must become a closed atom. If it is true, then $(\rm{Ax\;R})$ obtains the desired sequent and $(\rm{Ax\;L})$ otherwise.
-        \item \textbf{\emph{Arithmetical rules:}} \todo{Write up}
+        \item \textbf{\emph{Logical and structural rules:}} The majority of logical structural rules are identical to the rules in the finitary system. However we need to obtain $(\forall\rm{R})$ and $(\exists\rm{L})$. We will do the case for $(\forall\rm{R})$:
+        \begin{center}
+\AxiomC{$\seq{\Gamma}{A(a)}$}
+\RightLabel{$(\forall\rm{R})$}
+\UnaryInfC{$\seq{\Gamma}{\forall x\,A(x)}$}
+\DisplayProof
+        \end{center}
+        Where the eigenvariable condition is satisfied. We apply the induction hypothesis on the premise which obtains for us $\seqd{\Gamma}{A(\nmrl{k})}{n}{r}$. Then, $(\forall\rm{R}_\infty)$ obtains the desired conclusion.
+        \item \textbf{\emph{Arithmetical rules:}} These are obtained by the previous lemmas.
+        \item \textbf{\emph{Induction rule:}} By induction admissibility.
     \end{itemize}
 \end{proof}
 \section{Rank reduction}
@@ -183,40 +238,101 @@ Before proving rank reduction, we need the following lemma:
 \begin{cthlemma}{(Single-cut Rank Reduction)}
     Let $\gr(A) = r$, $\seqd{\Gamma}{A}{\alpha}{r}$ and $\seqd{\Pi,A}{C}{\beta}{r}$, then:
     \[ \seqd{\Gamma,\Pi}{C}{\omega \cdot (\alpha \# \beta) + \omega}{r} \]
-\end{cthlemma}
-For any cut-formula $A$ in a proof $\seqd{\Gamma}{C}{\alpha}{r}$ we require $\gr(A) < r$. Thus this lemma requires replacing the application of cut on $A$ to one on its subformulae. As an example, if $A = B \to B'$, suppose $A$ is principal formula on both sides of the cut. Therefore we have:
-\begin{center}
-    \AxiomC{$\seqd{\Gamma}{B}{\beta'}{r}$}
-    \AxiomC{$\seqd{\Gamma,B'}{C}{\beta'}{r}$}
-    \RightLabel{$(\to\rm{R})$}
-    \BinaryInfC{$\seqd{\Gamma,B \to B'}{C}{\beta'}{r}$}
-    \DisplayProof
-    \quad
-    \AxiomC{$\seqd{\Gamma,B}{B'}{\alpha'}{r}$}
-    \RightLabel{$(\to\rm{L})$}
-    \UnaryInfC{$\seqd{\Gamma}{B \to B'}{\alpha'}{r}$}
-    \DisplayProof
-\end{center}
-We can therefore, apply cut on the premises:
-\begin{center}
-    \AxiomC{$\seqd{\Gamma}{B}{\gamma}{r}$}
-    \AxiomC{$\seqd{\Gamma,B}{B'}{\gamma}{r}$}
-    \AxiomC{$\seqd{\Gamma,B'}{C}{\gamma}{r}$}
-    \RightLabel{$(\rm{Cut})$}
-    \BinaryInfC{$\seqd{\Gamma,B}{C}{\gamma}{r}$}
-    \RightLabel{$(\rm{Cut})$}
-    \BinaryInfC{$\seqd{\Gamma}{C}{\gamma}{r}$}
-    \DisplayProof
-\end{center}
-Therefore, we see this subproof contributes at most $\max(\alpha',\beta')+2$. If we have $n$ many $A = B \to B'$ in the proof, we can bound the whole proof with $\omega \cdot (\alpha \# \beta) + \omega$ (since $\max(\alpha,\beta) < \alpha \# \beta$). 
-
+  \end{cthlemma}
+  \begin{proof}
+    We now prove by induction on the two premises:
+    \begin{itemize}[leftmargin=*]
+    \item \textbf{$A$ is not principal on right premise:} Then the premise has form:
+          \begin{center}
+            \AxiomC{$\seqd{\Pi_i,A}{C_i}{\beta_i}{r}$}
+            \RightLabel{$(\rm{J})$}
+            \UnaryInfC{$\seqd{\Pi,A}{C_i}{\beta}{r}$}
+            \DisplayProof
+          \end{center}
+          We apply our induction hypothesis on each premise with the left premise, giving us: $\seqd{\Gamma,\Pi_i}{C_i}{\omega\cdot(\alpha \# \beta_i)+w}{r}$. Then applying $J$ on these obtains $\seqd{\Gamma,\Pi}{C}{\omega\cdot(\alpha \# \beta)+w}{r}$.            
+        \item \textbf{$A$ is principal on the right premise:} The rule applied on the right premise must be some left-rule.
+        \begin{itemize}[leftmargin=*]
+        \item \textbf{$A$ is not principal on the left:} The left preise has form:
+          \begin{center}
+            \AxiomC{$\seqd{\Gamma_i}{A}{\alpha_i}{r}$}
+            \RightLabel{$(\rm{J})$}
+            \UnaryInfC{$\seqd{\Gamma}{A}{\alpha}{r}$}
+            \DisplayProof
+          \end{center}
+          We apply our induction hypothesis on each premise with the right premise, giving us: $\seqd{\Gamma_i,\Pi}{C_i}{\omega\cdot(\alpha_i \# \beta)+w}{r}$. Then applying $J$ on these obtains $\seqd{\Gamma,\Pi}{C}{\omega\cdot(\alpha \# \beta)+w}{r}$.
+          
+        \item \textbf{$A$ is principal on left:} There are several cases here, but we do two cases here:
+          \begin{itemize}[leftmargin=*]
+          \item If $A = B \to B'$, then we have:
+            \begin{center}
+              \AxiomC{$\seqd{\Gamma,B}{B'}{\alpha'}{r}$}
+              \RightLabel{$(\to\rm{R})$}
+              \UnaryInfC{$\seqd{\Gamma}{B \to B'}{\alpha'}{r}$}
+              \DisplayProof
+              \quad
+              \AxiomC{$\seqd{\Pi}{B}{\beta'}{r}$}
+              \AxiomC{$\seqd{\Pi,B'}{C}{\beta'}{r}$}
+              \RightLabel{$(\to\rm{L})$}
+              \BinaryInfC{$\seqd{\Pi,B \to B'}{C}{\beta'}{r}$}
+              \DisplayProof
+            \end{center}
+            We can therefore, apply cut on the premises:
+            \begin{center}
+              \AxiomC{$\seqd{\Pi}{B}{\gamma}{r}$}
+              \AxiomC{$\seqd{\Gamma,B}{B'}{\gamma}{r}$}
+              \AxiomC{$\seqd{\Pi,B'}{C}{\gamma}{r}$}
+              \RightLabel{$(\rm{Cut})$}
+              \BinaryInfC{$\seqd{\Gamma,\Pi,B}{C}{\gamma}{r}$}
+              \RightLabel{$(\rm{Cut})$}
+              \BinaryInfC{$\seqd{\Gamma,\Pi}{C}{\gamma}{r}$}
+              \DisplayProof
+            \end{center}
+            Therefore, we see this subproof contributes at most $\max(\alpha',\beta')+2$. If we have $n$ many $A = B \to B'$ in the proof, we can bound the whole proof with $\omega \cdot (\alpha \# \beta) + \omega$ (since $\max(\alpha,\beta) < \alpha \# \beta$).
+          \item If $A = \forall x\; B(x)$, then we have:
+            {\small\begin{center}
+              \AxiomC{$\seqd{\Gamma}{B(t) \quad \text{(for all $t$)}}{\alpha_i}{r}$}
+              \RightLabel{$(\forall\rm{R}_\infty)$}
+              \UnaryInfC{$\seqd{\Gamma}{\forall x\;B(x)}{\alpha}{r}$}
+              \DisplayProof
+              \quad
+              \AxiomC{$\seqd{\Pi,B(s),\forall x\;B(x)}{C}{\beta'}{r}$}
+              \RightLabel{$(\forall\rm{L})$}
+              \UnaryInfC{$\seqd{\Pi,\forall x\;B(x)}{C}{\beta}{r}$}
+              \DisplayProof
+            \end{center}}
+          We can apply cut on the premises with $\gamma = \omega(\alpha\#\beta')+\omega$:
+          {\small\begin{center}
+            \AxiomC{$\seqd{\Gamma}{\forall x\;B(x)}{\alpha}{r}$}
+            \AxiomC{$\seqd{\Pi,B(s),\forall x\;B(x)}{C}{\beta'}{r}$}
+            \RightLabel{$(\rm{Cut})$}
+            \BinaryInfC{$\seqd{\Gamma,\Pi,B(s)}{C}{\gamma}{r}$}
+            \AxiomC{$\seqd{\Gamma}{B(s)}{\alpha_i}{r}$}
+            \RightLabel{$(\rm{Cut)}$}
+            \BinaryInfC{$\seqd{\Gamma,\Pi}{C}{\gamma}{r}$}
+            \DisplayProof
+          \end{center}}
+          \end{itemize}
+        \end{itemize}
+      \end{itemize}
+\end{proof}
 \begin{cththeorem}{(Rank reduction)}
     If $\seqd{\Gamma}{C}{\alpha}{r+1}$, then $\seqd{\Gamma}{C}{\omega^{\left(\omega^\alpha\right)}}{r}$
 \end{cththeorem}
 \begin{proof}
-    This is by induction on the left and right derivations. \todo{Write up the other cases (inversion lemmas helpful here)}. Let $A$ be the cut with $\gr(A) = r$, then we have premises:  $\seqd{\Gamma}{A}{\alpha_1}{r+1}$ and $\seqd{\Gamma,A}{C}{\alpha_2}{r+1}$ (where $\alpha_1,\alpha_2 < \alpha$). Applying the induction hypothesis on the two premises gives us: $\seqd{\Gamma}{A}{\omega^{\omega^\alpha_1}}{r}$ and $\seqd{\Gamma,A}{C}{\omega^{\omega^\alpha_2}}{r}$. We can apply our previous lemma on this to obtain: 
+  This is by induction on the premise.
+  \begin{itemize}
+  \item \textbf{The last inference is not a cut with grade $r$}: Let $J$ be the last inference, then we have form:
+    \begin{center}
+      \AxiomC{$\seqd{\Gamma'_i}{C'_i}{\alpha_i}{r+1}$}
+      \RightLabel{$(\rm{J})$}
+      \UnaryInfC{$\seqd{\Gamma}{C}{\alpha}{r+1}$}
+      \DisplayProof
+    \end{center}
+    We apply the inductive hypothesis on the premise to obtain: $\seqd{\Gamma'_i}{C'_i}{\omega^{\omega^\alpha_i}}{r}$. Then reapply $J$ to obtain $\seqd{\Gamma}{C}{\omega^{\omega^\alpha}}{r}$.
+    \item \textbf{The last inference is a cut with grade $r$:} Let $A$ be the cut with $\gr(A) = r$, then we have premises:  $\seqd{\Gamma}{A}{\alpha_1}{r+1}$ and $\seqd{\Gamma,A}{C}{\alpha_2}{r+1}$ (where $\alpha_1,\alpha_2 < \alpha$). Applying the induction hypothesis on the two premises gives us: $\seqd{\Gamma}{A}{\omega^{\omega^\alpha_1}}{r}$ and $\seqd{\Gamma,A}{C}{\omega^{\omega^\alpha_2}}{r}$. We can apply our previous lemma on this to obtain: 
     \[ \seqd{\Gamma}{C}{\omega\cdot \left(\omega^{\omega^{\alpha_1}}\#\omega^{\omega^{\alpha_2}}\right) + \omega}{r} \]
     Since $\omega\cdot \left(\omega^{\omega^{\alpha_1}}\#\omega^{\omega^{\alpha_2}}\right) + \omega < \omega^{\left(\omega^\alpha\right)}$, our conclusion holds.
+    \end{itemize}
 \end{proof}
 
 \begin{cththeorem}{(Cut-elimination)}
@@ -227,7 +343,7 @@ Therefore, we see this subproof contributes at most $\max(\alpha',\beta')+2$. If
 \end{proof}
 
 \begin{cththeorem}{(No cut-free empty sequent)}
-    $\seqd{}{}{\alpha}{r}$ does not hold.
+    $\seqd{}{}{\alpha}{0}$ does not hold.
 \end{cththeorem}
 \begin{proof}
     This holds by induction on number of inferences.
@@ -236,8 +352,9 @@ Therefore, we see this subproof contributes at most $\max(\alpha',\beta')+2$. If
 \begin{cththeorem}{(Consistency of HA)}
     $\HA$ is consistent.
 \end{cththeorem}
-
-\todo{Currently $\HA_\omega$ proves $\HA$ can't, but if we can change that (i.e. weaken the $\omega$-rule), then I see nowhere the proof will go wrong. And if thats the case, it seems like I can reobtain disjunction/existential property for $\HA$ and $\HA_\omega$ }
+\begin{proof}
+  By cut-elimination, we find the empty sequent cannot be proven in $\HA_\omega$. By the embedding theorem, it also cannot be prove in $\HA$.
+\end{proof}
 
 %%% Local Variables:
 %%% mode: LaTeX
